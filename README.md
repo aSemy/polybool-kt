@@ -1,7 +1,9 @@
-polybool
+polybool-kt
 ========
 
 Boolean operations on polygons (union, intersection, difference, xor).
+
+(Kotlin Multiplatform port of https://github.com/velipso/polybool)
 
 # Features
 
