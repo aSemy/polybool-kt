@@ -1,3 +1,5 @@
+package dev.adamko.polybool
+
 ////
 //// polybool - Boolean operations on polygons (union, intersection, etc)
 //// by Sean Connelly (@velipso), https://sean.fun

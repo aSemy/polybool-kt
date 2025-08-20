@@ -1,3 +1,6 @@
+package dev.adamko.polybool
+
+import  dev.adamko.polybool.internal.DoubleList
 import kotlin.math.sign
 
 ////
@@ -313,7 +316,7 @@ class Intersecter internal constructor(
     this.log?.segmentDivide(ev.seg, p)
 
 //    const [left, right] = ev.seg.data.split([t]) as [Segment, Segment];
-    val (left, right) = ev.seg.data.split(doubleArrayOf(t)).apply {
+    val (left, right) = ev.seg.data.split(DoubleList(t)).apply {
       require(this.size == 2) {
         "Splitting a segment did not return two segments! ev.seg.data=${ev.seg.data}"
       }
@@ -403,31 +406,36 @@ class Intersecter internal constructor(
     this.addSegment(seg, primary)
   }
 
-  fun addCurve(from: Vec2, c1: Vec2, c2: Vec2, to: Vec2, primary: Boolean = true) {
-//    const original = new SegmentCurve(from, c1, c2, to, this.geo);
-//    const curves = original.split(original.inflectionTValues());
-//    for (const curve of curves) {
-//      const f = this.geo.compareVec2(curve.start(), curve.end());
-//      if (f === 0) {
-//        // points are equal AFTER splitting... this only happens for zero-length segments
-//        continue; // skip it
-//      }
-//      // convert horizontal/vertical curves to lines
-//      const line = curve.toLine();
-//      if (line) {
-//        this.addLine(line.p0, line.p1, primary);
-//      } else {
-//        const seg = new SegmentBoolCurve(
-//          f < 0 ? curve : curve.reverse(),
-//          null,
-//          false,
-//          this.log,
-//        );
-//        this.currentPath.push(seg);
-//        this.addSegment(seg, primary);
-//      }
-//    }
-    TODO()
+  fun addCurve(
+    from: Vec2,
+    c1: Vec2,
+    c2: Vec2,
+    to: Vec2,
+    primary: Boolean = true
+  ) {
+    val original = SegmentCurve(from, c1, c2, to, this.geo)
+    val curves = original.split(original.inflectionTValues())
+    for (curve in curves) {
+      val f = this.geo.compareVec2(curve.start(), curve.end())
+      if (f == 0) {
+        // points are equal AFTER splitting... this only happens for zero-length segments
+        continue // skip it
+      }
+      // convert horizontal/vertical curves to lines
+      val line = curve.toLine()
+      if (line != null) {
+        this.addLine(line.p0, line.p1, primary)
+      } else {
+        val seg = SegmentBoolCurve(
+          data = if (f < 0) curve else curve.reverse(),
+          fill = null,
+          closed = false,
+          log = this.log,
+        )
+        this.currentPath.addLast(seg)
+        this.addSegment(seg, primary)
+      }
+    }
   }
 
   fun compareSegments(seg1: Segment, seg2: Segment): Int {
@@ -498,18 +506,17 @@ class Intersecter internal constructor(
         // unfortunately, in order to sort against curved segments, we need to check the
         // intersection point... this means a lot more intersection tests, but I'm not sure how else
         // to sort correctly
-//        const i = segmentsIntersect(seg1, seg2, true);
-//        if (i && i.kind === "tValuePairs") {
-//          // find the intersection point on seg1
-//          for (const pair of i.tValuePairs) {
-//            const t = this.geo.snap01(pair[0]);
-//            if (t > 0 && t < 1) {
-//              B = seg1.point(t);
-//              break;
-//            }
-//          }
-//        }
-        TODO()
+        val i = segmentsIntersect(seg1, seg2, true)
+        if (i is SegmentTValuePairs) {
+          // find the intersection point on seg1
+          for (pair in i.tValuePairs) {
+            val t = this.geo.snap01(pair[0])
+            if (t > 0 && t < 1) {
+              B = seg1.point(t)
+              break
+            }
+          }
+        }
       }
     }
 
@@ -901,9 +908,9 @@ class Intersecter internal constructor(
           val evSegOtherFill = requireNotNull(ev.seg.otherFill) {
             "Unexpected state of otherFill (null)"
           }
-          val s = ev.seg.myFill;
-          ev.seg.myFill = evSegOtherFill;
-          ev.seg.otherFill = s;
+          val s = ev.seg.myFill
+          ev.seg.myFill = evSegOtherFill
+          ev.seg.otherFill = s
 //          TODO()
         }
         segments.addLast(ev.seg)

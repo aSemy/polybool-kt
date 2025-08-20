@@ -1,4 +1,6 @@
-////
+package dev.adamko.polybool
+
+
 //// polybool - Boolean operations on polygons (union, intersection, etc)
 //// by Sean Connelly (@velipso), https://sean.fun
 //// Project Home: https://github.com/velipso/polybool
@@ -353,27 +355,34 @@ class Shape internal constructor(
     cp2y: Double,
     x: Double,
     y: Double,
-  ) {
+  ): Shape {
 //    if (this.resultState.state !== "new") {
 //      throw new Error(
 //        "PolyBool: Cannot change shape after using it in an operation",
 //      );
 //    }
+    val resultState = this.resultState
+    require(resultState is ResultState.New) {
+      "Cannot change shape after using it in an operation"
+    }
 //    if (this.pathState.kind !== "moveTo") {
 //      throw new Error(
 //        "PolyBool: Must call moveTo prior to calling bezierCurveTo",
 //      );
 //    }
-//    const current = this.transformPoint(x, y);
-//    this.resultState.selfIntersect.addCurve(
-//      this.pathState.current,
-//      this.transformPoint(cp1x, cp1y),
-//      this.transformPoint(cp2x, cp2y),
-//      current,
-//    );
-//    this.pathState.current = current;
-//    return this;
-    TODO()
+    val pathState = this.pathState
+    require(pathState is IPathState.MoveTo) {
+      "Must call moveTo prior to calling bezierCurveTo"
+    }
+    val current = this.transformPoint(x, y);
+    resultState.selfIntersect.addCurve(
+      from = pathState.current,
+      c1 = this.transformPoint(cp1x, cp1y),
+      c2 = this.transformPoint(cp2x, cp2y),
+      to = current,
+    );
+    pathState.current = current;
+    return this
   }
 
   fun closePath(): Shape {

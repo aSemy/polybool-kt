@@ -1,5 +1,11 @@
+package dev.adamko.polybool
+
+
+import dev.adamko.polybool.internal.DoubleList
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.sqrt
 
 ////
 //// polybool - Boolean operations on polygons (union, intersection, etc)
@@ -38,41 +44,41 @@ class SegmentTRangePairs(
 ) : SegmentTValueOrRangePairs
 
 //export class SegmentTValuesBuilder {
-//  tValues: number[] = [];
-//  geo: Geometry;
-//
-//  constructor(geo: Geometry) {
-//    this.geo = geo;
-//  }
-//
-//  addArray(ts: number[]) {
-//    for (const t of ts) {
-//      this.tValues.push(t);
+internal class SegmentTValuesBuilder(
+  private val geo: Geometry,
+) {
+  private val tValues: ArrayDeque<Double> = ArrayDeque()
+  //
+  fun addArray(ts: DoubleList): SegmentTValuesBuilder {
+//    for (  t in ts) {
+//      this.tValues.addLast(t);
 //    }
-//    return this;
-//  }
-//
-//  add(t: number) {
-//    t = this.geo.snap01(t);
-//    // ignore values outside 0-1 range
-//    if (t < 0 || t > 1) {
-//      return this;
-//    }
-//    for (const tv of this.tValues) {
-//      if (this.geo.snap0(t - tv) === 0) {
-//        // already have this location
-//        return this;
-//      }
-//    }
-//    this.tValues.push(t);
-//    return this;
-//  }
-//
-//  list() {
+    tValues.addAll(ts)
+    return this
+  }
+
+  fun add(t: Double): SegmentTValuesBuilder {
+    val t = this.geo.snap01(t)
+    // ignore values outside 0-1 range
+    if (t < 0 || t > 1) {
+      return this
+    }
+    for (tv in this.tValues) {
+      if (this.geo.snap0(t - tv) == 0.0) {
+        // already have this location
+        return this
+      }
+    }
+    this.tValues.addLast(t)
+    return this
+  }
+
+  fun list(): DoubleList {
 //    this.tValues.sort((a, b) => a - b);
-//    return this.tValues;
-//  }
-//}
+    this.tValues.sort()
+    return DoubleList(this.tValues)
+  }
+}
 
 //export class SegmentTValuePairsBuilder {
 internal class SegmentTValuePairsBuilder(
@@ -148,7 +154,7 @@ abstract class SegmentBase<T> {
   abstract fun setStart(p: Vec2)
   abstract fun setEnd(p: Vec2)
   abstract fun point(t: Double): Vec2
-  abstract fun split(ts: DoubleArray): List<T>
+  abstract fun split(ts: DoubleList): List<T>
   abstract fun reverse(): T
   abstract fun boundingBox(): BoundingBox
   abstract fun pointOn(p: Vec2): Boolean
@@ -192,7 +198,7 @@ data class SegmentLine internal constructor(
     }
   }
 
-  override fun split(ts: DoubleArray): List<SegmentLine> {
+  override fun split(ts: DoubleList): List<SegmentLine> {
     if (ts.isEmpty()) {
       return listOf(this)
     }
@@ -317,32 +323,31 @@ data class SegmentCurve internal constructor(
 //  }
 
   override fun point(t: Double): Vec2 {
-//    const p0 = this.p0;
-//    const p1 = this.p1;
-//    const p2 = this.p2;
-//    const p3 = this.p3;
-//
-//    if (t === 0) {
-//      return p0;
-//    } else if (t === 1) {
-//      return p3;
-//    }
-//
-//    const t1t = (1 - t) * (1 - t);
-//    const tt = t * t;
-//    const t0 = t1t * (1 - t);
-//    const t1 = 3 * t1t * t;
-//    const t2 = 3 * tt * (1 - t);
-//    const t3 = tt * t;
-//
-//    return [
-//      p0[0] * t0 + p1[0] * t1 + p2[0] * t2 + p3[0] * t3,
-//      p0[1] * t0 + p1[1] * t1 + p2[1] * t2 + p3[1] * t3,
-//    ];
-    TODO()
+    val p0 = this.p0
+    val p1 = this.p1
+    val p2 = this.p2
+    val p3 = this.p3
+
+    if (t == 0.0) {
+      return p0
+    } else if (t == 1.0) {
+      return p3
+    }
+
+    val t1t = (1 - t) * (1 - t)
+    val tt = t * t
+    val t0 = t1t * (1 - t)
+    val t1 = 3 * t1t * t
+    val t2 = 3 * tt * (1 - t)
+    val t3 = tt * t
+
+    return Vec2(
+      p0[0] * t0 + p1[0] * t1 + p2[0] * t2 + p3[0] * t3,
+      p0[1] * t0 + p1[1] * t1 + p2[1] * t2 + p3[1] * t3,
+    )
   }
 
-  override fun split(ts: DoubleArray): List<SegmentCurve> {
+  override fun split(ts: DoubleList): List<SegmentCurve> {
     if (ts.size <= 0) {
       return listOf(this)
     }
@@ -391,87 +396,102 @@ data class SegmentCurve internal constructor(
     return SegmentCurve(this.p3, this.p2, this.p1, this.p0, this.geo)
   }
 
-//  fun   getCubicCoefficients(axis: number): [number, number, number, number] {
-//    const p0 = this.p0[axis];
-//    const p1 = this.p1[axis];
-//    const p2 = this.p2[axis];
-//    const p3 = this.p3[axis];
-//    return [
-//      p3 - 3 * p2 + 3 * p1 - p0,
-//      3 * p2 - 6 * p1 + 3 * p0,
-//      3 * p1 - 3 * p0,
-//      p0,
-//    ];
-//  }
-
-  fun boundingTValues() {
-//    const result = new SegmentTValuesBuilder(this.geo);
-//    const bounds = (x0: number, x1: number, x2: number, x3: number) => {
-//      const a = 3 * x3 - 9 * x2 + 9 * x1 - 3 * x0;
-//      const b = 6 * x0 - 12 * x1 + 6 * x2;
-//      const c = 3 * x1 - 3 * x0;
-//      if (this.geo.snap0(a) === 0) {
-//        result.add(-c / b);
-//      } else {
-//        const disc = b * b - 4 * a * c;
-//        if (disc >= 0) {
-//          const sq = Math.sqrt(disc);
-//          result.add((-b + sq) / (2 * a));
-//          result.add((-b - sq) / (2 * a));
-//        }
-//      }
-//      return result;
-//    };
-//
-//    const p0 = this.p0;
-//    const p1 = this.p1;
-//    const p2 = this.p2;
-//    const p3 = this.p3;
-//    bounds(p0[0], p1[0], p2[0], p3[0]);
-//    bounds(p0[1], p1[1], p2[1], p3[1]);
-//
-//    return result.list();
-    TODO()
+  data class CubicCoefficients(
+    val a: Double,
+    val b: Double,
+    val c: Double,
+    val d: Double,
+  ) {
+    operator fun get(i: Int): Double = when (i) {
+      0    -> a
+      1    -> b
+      2    -> c
+      3    -> d
+      else -> throw IndexOutOfBoundsException("Invalid index $i for CubicCoefficients")
+    }
   }
 
-//  fun  inflectionTValues(): number[] {
-//    const result = new SegmentTValuesBuilder(this.geo);
-//    result.addArray(this.boundingTValues());
-//    const p0 = this.p0;
-//    const p1 = this.p1;
-//    const p2 = this.p2;
-//    const p3 = this.p3;
-//    const p10x = 3 * (p1[0] - p0[0]);
-//    const p10y = 3 * (p1[1] - p0[1]);
-//    const p21x = 6 * (p2[0] - p1[0]);
-//    const p21y = 6 * (p2[1] - p1[1]);
-//    const p32x = 3 * (p3[0] - p2[0]);
-//    const p32y = 3 * (p3[1] - p2[1]);
-//    const p210x = 6 * (p2[0] - 2 * p1[0] + p0[0]);
-//    const p210y = 6 * (p2[1] - 2 * p1[1] + p0[1]);
-//    const p321x = 6 * (p3[0] - 2 * p2[0] + p1[0]);
-//    const p321y = 6 * (p3[1] - 2 * p2[1] + p1[1]);
-//    const qx = p10x - p21x + p32x;
-//    const qy = p10y - p21y + p32y;
-//    const rx = p21x - 2 * p10x;
-//    const ry = p21y - 2 * p10y;
-//    const sx = p10x;
-//    const sy = p10y;
-//    const ux = p321x - p210x;
-//    const uy = p321y - p210y;
-//    const vx = p210x;
-//    const vy = p210y;
-//    const A = qx * uy - qy * ux;
-//    const B = qx * vy + rx * uy - qy * vx - ry * ux;
-//    const C = rx * vy + sx * uy - ry * vx - sy * ux;
-//    const D = sx * vy - sy * vx;
-//    for (const s of this.geo.solveCubic(A, B, C, D)) {
-//      result.add(s);
-//    }
-//    return result.list();
-//  }
-//
-//  fun boundingBox(): [Vec2, Vec2] {
+  fun getCubicCoefficients(axis: Int): CubicCoefficients {
+    val p0 = this.p0[axis];
+    val p1 = this.p1[axis];
+    val p2 = this.p2[axis];
+    val p3 = this.p3[axis];
+    return CubicCoefficients(
+      p3 - 3 * p2 + 3 * p1 - p0,
+      3 * p2 - 6 * p1 + 3 * p0,
+      3 * p1 - 3 * p0,
+      p0,
+    );
+  }
+
+  fun boundingTValues(): DoubleList {
+    val result = SegmentTValuesBuilder(this.geo)
+
+    fun bounds(x0: Double, x1: Double, x2: Double, x3: Double) {
+      val a = 3 * x3 - 9 * x2 + 9 * x1 - 3 * x0
+      val b = 6 * x0 - 12 * x1 + 6 * x2
+      val c = 3 * x1 - 3 * x0
+      if (this.geo.snap0(a) == 0.0) {
+        result.add(-c / b)
+      } else {
+        val disc = b * b - 4 * a * c
+        if (disc >= 0) {
+          val sq = sqrt(disc)
+          result.add((-b + sq) / (2 * a))
+          result.add((-b - sq) / (2 * a))
+        }
+      }
+//      return result;
+    }
+
+    val p0 = this.p0
+    val p1 = this.p1
+    val p2 = this.p2
+    val p3 = this.p3
+    bounds(p0[0], p1[0], p2[0], p3[0])
+    bounds(p0[1], p1[1], p2[1], p3[1])
+
+    return result.list()
+  }
+
+  fun inflectionTValues(): DoubleList {
+    val result = SegmentTValuesBuilder(this.geo)
+    result.addArray(this.boundingTValues())
+    val p0 = this.p0
+    val p1 = this.p1
+    val p2 = this.p2
+    val p3 = this.p3
+    val p10x = 3 * (p1[0] - p0[0])
+    val p10y = 3 * (p1[1] - p0[1])
+    val p21x = 6 * (p2[0] - p1[0])
+    val p21y = 6 * (p2[1] - p1[1])
+    val p32x = 3 * (p3[0] - p2[0])
+    val p32y = 3 * (p3[1] - p2[1])
+    val p210x = 6 * (p2[0] - 2 * p1[0] + p0[0])
+    val p210y = 6 * (p2[1] - 2 * p1[1] + p0[1])
+    val p321x = 6 * (p3[0] - 2 * p2[0] + p1[0])
+    val p321y = 6 * (p3[1] - 2 * p2[1] + p1[1])
+    val qx = p10x - p21x + p32x
+    val qy = p10y - p21y + p32y
+    val rx = p21x - 2 * p10x
+    val ry = p21y - 2 * p10y
+    val sx = p10x
+    val sy = p10y
+    val ux = p321x - p210x
+    val uy = p321y - p210y
+    val vx = p210x
+    val vy = p210y
+    val A = qx * uy - qy * ux
+    val B = qx * vy + rx * uy - qy * vx - ry * ux
+    val C = rx * vy + sx * uy - ry * vx - sy * ux
+    val D = sx * vy - sy * vx
+    for (s in this.geo.solveCubic(A, B, C, D)) {
+      result.add(s)
+    }
+    return result.list()
+  }
+
+  override fun boundingBox(): BoundingBox {
 //    const p0 = this.p0;
 //    const p3 = this.p3;
 //    const min: Vec2 = [Math.min(p0[0], p3[0]), Math.min(p0[1], p3[1])];
@@ -484,62 +504,70 @@ data class SegmentCurve internal constructor(
 //      max[1] = Math.max(max[1], p[1]);
 //    }
 //    return [min, max];
-//  }
+    TODO()
+  }
 
   // fun   mapXtoT(x: number, force: Boolean = false): number | false {
   fun mapXtoT(x: Double, force: Boolean = false): Double? {
-//    if (this.geo.snap0(this.p0[0] - x) === 0) {
-//      return 0;
-//    }
-//    if (this.geo.snap0(this.p3[0] - x) === 0) {
-//      return 1;
-//    }
-//    const p0 = this.p0[0] - x;
-//    const p1 = this.p1[0] - x;
-//    const p2 = this.p2[0] - x;
-//    const p3 = this.p3[0] - x;
+    if (this.geo.snap0(this.p0[0] - x) == 0.0) {
+      return 0.0
+    }
+    if (this.geo.snap0(this.p3[0] - x) == 0.0) {
+      return 1.0
+    }
+    val p0 = this.p0[0] - x
+    val p1 = this.p1[0] - x
+    val p2 = this.p2[0] - x
+    val p3 = this.p3[0] - x
 //    const R = [
 //      p3 - 3 * p2 + 3 * p1 - p0,
 //      3 * p2 - 6 * p1 + 3 * p0,
 //      3 * p1 - 3 * p0,
 //      p0,
 //    ];
-//    for (const t of this.geo.solveCubic(R[0], R[1], R[2], R[3])) {
-//      const ts = this.geo.snap01(t);
-//      if (ts >= 0 && ts <= 1) {
-//        return t;
-//      }
-//    }
-//    // force a solution if we know there is one...
-//    if (
-//      force ||
-//      (x >= Math.min(this.p0[0], this.p3[0]) &&
-//        x <= Math.max(this.p0[0], this.p3[0]))
-//    ) {
+    val R = doubleArrayOf(
+      p3 - 3 * p2 + 3 * p1 - p0,
+      3 * p2 - 6 * p1 + 3 * p0,
+      3 * p1 - 3 * p0,
+      p0,
+    )
+    for (t in this.geo.solveCubic(R[0], R[1], R[2], R[3])) {
+      val ts = this.geo.snap01(t)
+      if (ts >= 0 && ts <= 1) {
+        return t
+      }
+    }
+    // force a solution if we know there is one...
+    if (
+      force ||
+      (x >= min(this.p0[0], this.p3[0]) &&
+        x <= max(this.p0[0], this.p3[0]))
+    ) {
 //      for (let attempt = 0; attempt < 4; attempt++) {
-//        // collapse an R value to 0, this is so wrong!!!
-//        let ii = -1;
-//        for (let i = 0; i < 4; i++) {
-//          if (R[i] !== 0 && (ii < 0 || Math.abs(R[i]) < Math.abs(R[ii]))) {
-//            ii = i;
-//          }
-//        }
-//        if (ii < 0) {
-//          return 0;
-//        }
-//        R[ii] = 0;
-//
-//        // solve again, but with another 0 to help
-//        for (const t of this.geo.solveCubic(R[0], R[1], R[2], R[3])) {
-//          const ts = this.geo.snap01(t);
-//          if (ts >= 0 && ts <= 1) {
-//            return t;
-//          }
-//        }
-//      }
-//    }
-//    return false;
-    TODO()
+      for (attempt in 0..3) {
+        // collapse an R value to 0, this is so wrong!!!
+        var ii = -1
+        for (i in 0..3) {
+          if (R[i] != 0.0 && (ii < 0 || abs(R[i]) < abs(R[ii]))) {
+            ii = i
+          }
+        }
+        if (ii < 0) {
+          return 0.0
+        }
+        R[ii] = 0.0
+
+        // solve again, but with another 0 to help
+        for (t in this.geo.solveCubic(R[0], R[1], R[2], R[3])) {
+          val ts = this.geo.snap01(t)
+          if (ts >= 0 && ts <= 1) {
+            return t
+          }
+        }
+      }
+      //TODO()
+    }
+    return null
   }
 
   internal fun mapXtoY(x: Double, force: Boolean = false): Double? {
@@ -549,39 +577,42 @@ data class SegmentCurve internal constructor(
   }
 
   override fun pointOn(p: Vec2): Boolean {
-//    if (this.geo.isEqualVec2(this.p0, p) || this.geo.isEqualVec2(this.p3, p)) {
-//      return true;
-//    }
-//    const y = this.mapXtoY(p[0]);
-//    if (y === false) {
-//      return false;
-//    }
-//    return this.geo.snap0(y - p[1]) === 0;
-    TODO()
+    if (this.geo.isEqualVec2(this.p0, p) || this.geo.isEqualVec2(this.p3, p)) {
+      return true
+    }
+    val y = this.mapXtoY(p[0])
+      ?: return false
+    return this.geo.snap0(y - p[1]) == 0.0
   }
 
-  //  toLine(): SegmentLine | null {
-//    // note: this won't work for arbitrary curves, because they could loop back on themselves,
-//    // but will work fine for curves that have already been split at all inflection points
-//    const p0 = this.p0;
-//    const p1 = this.p1;
-//    const p2 = this.p2;
-//    const p3 = this.p3;
-//    if (
-//      // vertical line
-//      (this.geo.snap0(p0[0] - p1[0]) === 0 &&
-//        this.geo.snap0(p0[0] - p2[0]) === 0 &&
-//        this.geo.snap0(p0[0] - p3[0]) === 0) || // horizontal line
-//      (this.geo.snap0(p0[1] - p1[1]) === 0 &&
-//        this.geo.snap0(p0[1] - p2[1]) === 0 &&
-//        this.geo.snap0(p0[1] - p3[1]) === 0)
-//    ) {
+  fun toLine(): SegmentLine? {
+    // note: this won't work for arbitrary curves, because they could loop back on themselves,
+    // but will work fine for curves that have already been split at all inflection points
+    val p0 = this.p0
+    val p1 = this.p1
+    val p2 = this.p2
+    val p3 = this.p3
+    if (
+      (
+        // vertical line
+        this.geo.snap0(p0[0] - p1[0]) == 0.0 &&
+          this.geo.snap0(p0[0] - p2[0]) == 0.0 &&
+          this.geo.snap0(p0[0] - p3[0]) == 0.0
+        )
+      || // horizontal line
+      (
+        this.geo.snap0(p0[1] - p1[1]) == 0.0 &&
+          this.geo.snap0(p0[1] - p2[1]) == 0.0 &&
+          this.geo.snap0(p0[1] - p3[1]) == 0.0
+        )
+    ) {
 //      return new SegmentLine(p0, p3, this.geo);
-//    }
-//    return null;
-//  }
-//
-//  draw<TRecv extends IPolyBoolReceiver>(ctx: TRecv): TRecv {
+      TODO()
+    }
+    return null
+  }
+
+  //  draw<TRecv extends IPolyBoolReceiver>(ctx: TRecv): TRecv {
 //    const p0 = this.p0;
 //    const p1 = this.p1;
 //    const p2 = this.p2;
@@ -602,10 +633,6 @@ data class SegmentCurve internal constructor(
     TODO("Not yet implemented")
   }
 
-  override fun boundingBox(): BoundingBox {
-    TODO("Not yet implemented")
-  }
-
   override fun <TRecv : IPolyBoolReceiver> draw(ctx: TRecv): TRecv {
     TODO("Not yet implemented")
   }
@@ -623,7 +650,7 @@ sealed interface Segment {
   //  fun point(): Vec2
   fun point(t: Double): Vec2
   fun pointOn(p: Vec2): Boolean
-  fun split(ts: DoubleArray): List<Segment>
+  fun split(ts: DoubleList): List<Segment>
 
   fun setStart(p: Vec2)
   fun setEnd(p: Vec2)
@@ -715,70 +742,69 @@ internal fun segmentLineIntersectSegmentCurve(
   allowOutOfRange: Boolean,
   invert: Boolean,
 ): SegmentTValuePairs? {
-//  const geo = segA.geo;
-//  const a0 = segA.p0;
-//  const a1 = segA.p1;
-//
-//  const A = a1[1] - a0[1];
-//  const B = a0[0] - a1[0];
-//
-//  if (geo.snap0(B) === 0) {
-//    // vertical line
-//    const t = segB.mapXtoT(a0[0], false);
-//    if (t === false) {
-//      return null;
-//    }
-//    const y = segB.point(t)[1];
-//    const s = (y - a0[1]) / A;
-//    const result = new SegmentTValuePairsBuilder(allowOutOfRange, geo);
-//    if (invert) {
-//      result.add(t, s);
-//    } else {
-//      result.add(s, t);
-//    }
-//    return result.done();
-//  }
-//
-//  const C = A * a0[0] + B * a0[1];
-//
-//  const bx = segB.getCubicCoefficients(0);
-//  const by = segB.getCubicCoefficients(1);
-//
-//  const rA = A * bx[0] + B * by[0];
-//  const rB = A * bx[1] + B * by[1];
-//  const rC = A * bx[2] + B * by[2];
-//  const rD = A * bx[3] + B * by[3] - C;
-//
-//  const roots = geo.solveCubic(rA, rB, rC, rD);
-//
-//  const result = new SegmentTValuePairsBuilder(allowOutOfRange, geo);
-//
-//  if (geo.snap0(A) === 0) {
-//    // project curve's X component onto line
-//    for (const t of roots) {
-//      const X = bx[0] * t * t * t + bx[1] * t * t + bx[2] * t + bx[3];
-//      const s = (a0[0] - X) / B;
-//      if (invert) {
-//        result.add(t, s);
-//      } else {
-//        result.add(s, t);
-//      }
-//    }
-//  } else {
-//    // project curve's Y component onto line
-//    for (const t of roots) {
-//      const Y = by[0] * t * t * t + by[1] * t * t + by[2] * t + by[3];
-//      const s = (Y - a0[1]) / A;
-//      if (invert) {
-//        result.add(t, s);
-//      } else {
-//        result.add(s, t);
-//      }
-//    }
-//  }
-//
-//  return result.done();
-  TODO()
+  val geo = segA.geo
+  val a0 = segA.p0
+  val a1 = segA.p1
+
+  val A = a1[1] - a0[1]
+  val B = a0[0] - a1[0]
+
+  if (geo.snap0(B) == 0.0) {
+    // vertical line
+    val t = segB.mapXtoT(a0[0], false)
+    if (t == null) {
+      return null
+    }
+    val y = segB.point(t)[1]
+    val s = (y - a0[1]) / A
+    val result = SegmentTValuePairsBuilder(allowOutOfRange, geo)
+    if (invert) {
+      result.add(t, s)
+    } else {
+      result.add(s, t)
+    }
+    return result.done()
+  }
+
+  val C = A * a0[0] + B * a0[1]
+
+  val bx = segB.getCubicCoefficients(0)
+  val by = segB.getCubicCoefficients(1)
+
+  val rA = A * bx[0] + B * by[0]
+  val rB = A * bx[1] + B * by[1]
+  val rC = A * bx[2] + B * by[2]
+  val rD = A * bx[3] + B * by[3] - C
+
+  val roots = geo.solveCubic(rA, rB, rC, rD)
+
+  val result = SegmentTValuePairsBuilder(allowOutOfRange, geo)
+
+  if (geo.snap0(A) == 0.0) {
+    // project curve's X component onto line
+    for (t in roots) {
+      val X = bx[0] * t * t * t + bx[1] * t * t + bx[2] * t + bx[3]
+      val s = (a0[0] - X) / B
+      if (invert) {
+        result.add(t, s)
+      } else {
+        result.add(s, t)
+      }
+    }
+  } else {
+    // project curve's Y component onto line
+    for (t in roots) {
+      val Y = by[0] * t * t * t + by[1] * t * t + by[2] * t + by[3]
+      val s = (Y - a0[1]) / A
+      if (invert) {
+        result.add(t, s)
+      } else {
+        result.add(s, t)
+      }
+    }
+  }
+
+  return result.done()
 }
 
 internal fun segmentCurveIntersectSegmentCurve(

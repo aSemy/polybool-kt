@@ -1,5 +1,9 @@
+package dev.adamko.polybool
+
+import dev.adamko.polybool.internal.DoubleList
 import kotlin.math.abs
 import kotlin.math.absoluteValue
+import kotlin.math.sqrt
 
 ////
 //// polybool - Boolean operations on polygons (union, intersection, etc)
@@ -192,7 +196,7 @@ abstract class Geometry {
   abstract fun snap0(v: Double): Double
   abstract fun snap01(v: Double): Double
   abstract fun isCollinear(p1: Vec2, p2: Vec2, p3: Vec2): Boolean
-  abstract fun solveCubic(a: Double, b: Double, c: Double, d: Double): DoubleArray
+  abstract fun solveCubic(a: Double, b: Double, c: Double, d: Double): DoubleList
   abstract fun isEqualVec2(a: Vec2, b: Vec2): Boolean
   abstract fun compareVec2(a: Vec2, b: Vec2): Int
 }
@@ -252,73 +256,81 @@ data class GeometryEpsilon(
     return abs(dx1 * dy2 - dx2 * dy1) < this.epsilon
   }
 
-  private fun solveCubicNormalized(a: Double, b: Double, c: Double): DoubleArray {
-//    // based somewhat on gsl_poly_solve_cubic from GNU Scientific Library
-//    const a3 = a / 3;
-//    const b3 = b / 3;
-//    const Q = a3 * a3 - b3;
-//    const R = a3 * (a3 * a3 - b / 2) + c / 2;
-//    if (Math.abs(R) < this.epsilon && Math.abs(Q) < this.epsilon) {
-//      return [-a3];
-//    }
-//    const F =
-//      a3 * (a3 * (4 * a3 * c - b3 * b) - 2 * b * c) + 4 * b3 * b3 * b3 + c * c;
-//    if (Math.abs(F) < this.epsilon) {
-//      const sqrtQ = Math.sqrt(Q);
+  private fun solveCubicNormalized(a: Double, b: Double, c: Double): DoubleList {
+    // based somewhat on gsl_poly_solve_cubic from GNU Scientific Library
+    val a3 = a / 3;
+    val b3 = b / 3;
+    val Q = a3 * a3 - b3;
+    val R = a3 * (a3 * a3 - b / 2) + c / 2;
+    if (abs(R) < this.epsilon && abs(Q) < this.epsilon) {
+      return DoubleList(-a3);
+    }
+    val F =
+      a3 * (a3 * (4 * a3 * c - b3 * b) - 2 * b * c) + 4 * b3 * b3 * b3 + c * c;
+    if (abs(F) < this.epsilon) {
+      val sqrtQ = sqrt(Q);
 //      return R > 0
 //        ? [-2 * sqrtQ - a / 3, sqrtQ - a / 3]
 //        : [-sqrtQ - a / 3, 2 * sqrtQ - a / 3];
-//    }
-//    const Q3 = Q * Q * Q;
-//    const R2 = R * R;
-//    if (R2 < Q3) {
-//      const ratio = (R < 0 ? -1 : 1) * Math.sqrt(R2 / Q3);
+     return if (R > 0.0) {
+        DoubleList(-2 * sqrtQ - a / 3, sqrtQ - a / 3)
+      } else {
+        DoubleList(-sqrtQ - a / 3, 2 * sqrtQ - a / 3)
+      }
+    }
+    val Q3 = Q * Q * Q;
+    val R2 = R * R;
+    if (R2 < Q3) {
+//      const ratio = (R < 0 ? -1 : 1) *  sqrt(R2 / Q3);
 //      const theta = Math.acos(ratio);
-//      const norm = -2 * Math.sqrt(Q);
+//      const norm = -2 *  sqrt(Q);
 //      const x0 = norm * Math.cos(theta / 3) - a3;
 //      const x1 = norm * Math.cos((theta + 2 * Math.PI) / 3) - a3;
 //      const x2 = norm * Math.cos((theta - 2 * Math.PI) / 3) - a3;
 //      return [x0, x1, x2].sort((x, y) => x - y);
-//    } else {
+      TODO()
+    } else {
 //      const A =
-//        (R < 0 ? 1 : -1) * Math.pow(Math.abs(R) + Math.sqrt(R2 - Q3), 1 / 3);
-//      const B = Math.abs(A) >= this.epsilon ? Q / A : 0;
+//        (R < 0 ? 1 : -1) * Math.pow( abs(R) +  sqrt(R2 - Q3), 1 / 3);
+//      const B =  abs(A) >= this.epsilon ? Q / A : 0;
 //      return [A + B - a3];
-//    }
-    TODO()
+      TODO()
+    }
   }
 
   //  solveCubic(a: number, b: number, c: number, d: number) {
-//    if (Math.abs(a) < this.epsilon) {
-//      // quadratic
-//      if (Math.abs(b) < this.epsilon) {
-//        // linear case
-//        if (Math.abs(c) < this.epsilon) {
-//          // horizontal line
-//          return Math.abs(d) < this.epsilon ? [0] : [];
-//        }
-//        return [-d / c];
-//      }
-//      const b2 = 2 * b;
-//      let D = c * c - 4 * b * d;
-//      if (Math.abs(D) < this.epsilon) {
-//        return [-c / b2];
-//      } else if (D > 0) {
-//        D = Math.sqrt(D);
-//        return [(-c + D) / b2, (-c - D) / b2].sort((x, y) => x - y);
-//      }
-//      return [];
-//    }
-//    return this.solveCubicNormalized(b / a, c / a, d / a);
 //  }
-  override fun solveCubic(a: Double, b: Double, c: Double, d: Double): DoubleArray {
-    TODO("Not yet implemented")
+  override fun solveCubic(a: Double, b: Double, c: Double, d: Double): DoubleList {
+    if (abs(a) < this.epsilon) {
+      // quadratic
+      if (abs(b) < this.epsilon) {
+        // linear case
+        if (abs(c) < this.epsilon) {
+          // horizontal line
+          return if (abs(d) < this.epsilon) DoubleList(0.0) else DoubleList();
+        }
+        return DoubleList(-d / c);
+      }
+      val b2 = 2 * b;
+      var D = c * c - 4 * b * d;
+      if (abs(D) < this.epsilon) {
+        return DoubleList(-c / b2);
+      } else if (D > 0) {
+        D = sqrt(D);
+        return DoubleList((-c + D) / b2, (-c - D) / b2)
+          .sorted()
+        // TODO is this the right sort? Or maybe it should be reversed???
+//          .sort((x, y) => x - y);
+      }
+      return DoubleList();
+    }
+    return this.solveCubicNormalized(b / a, c / a, d / a);
   }
 
   //  isEqualVec2(a: Vec2, b: Vec2) {
 //    return (
-//      Math.abs(a[0] - b[0]) < this.epsilon &&
-//      Math.abs(a[1] - b[1]) < this.epsilon
+//       abs(a[0] - b[0]) < this.epsilon &&
+//       abs(a[1] - b[1]) < this.epsilon
 //    );
 //  }
   override fun isEqualVec2(a: Vec2, b: Vec2): Boolean {

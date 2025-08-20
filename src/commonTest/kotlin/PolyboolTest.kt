@@ -1,3 +1,6 @@
+package dev.adamko.polybool
+
+
 import de.infix.testBalloon.framework.testSuite
 import io.kotest.matchers.shouldBe
 
@@ -58,7 +61,18 @@ private val triangle2 = Polygon(
 //  ]],
 //  inverted: false
 //};
-//
+private val box1 = Polygon(
+  regions = listOf(
+    listOf(
+      Vec2(0.0, 0.0),
+      Vec2(5.0, 0.0),
+      Vec2(5.0, -5.0),
+      Vec2(0.0, -5.0),
+    ),
+  ),
+  inverted = false,
+)
+
 //const curve1 = {
 //  regions: [[
 //    [0, 0],
@@ -66,7 +80,16 @@ private val triangle2 = Polygon(
 //  ]],
 //  inverted: false
 //};
-//
+private val curve1 = Polygon(
+  regions = listOf(
+    listOf(
+      Vec2(0.0, 0.0),
+      Vec6(0.0, -5.0, 10.0, -5.0, 10.0, 0.0),
+    )
+  ),
+  inverted = false,
+)
+
 //class Receiver {
 //  log: any[] = [];
 //
@@ -137,8 +160,23 @@ val PolyBoolTest by testSuite {
       result.inverted shouldBe false
     }
   }
-}
-//const tests: { name: string, func(): void }[] = [
+  testSuite("union with curve") {
+    val result = polybool.union(box1, curve1)
+    test("regions") {
+      result.regions shouldBe listOf(
+        listOf(
+          Vec2(10.0, 0.0),
+          Vec6(10.0, -2.5, 7.5, -3.75, 5.0, -3.75),
+          Vec2(5.0, -5.0),
+          Vec2(0.0, -5.0),
+          Vec2(0.0, 0.0),
+        )
+      )
+    }
+    test("inverted") {
+      result.inverted shouldBe false
+    }
+  }
 //  {
 //    name: 'union with curve',
 //    func: () => {
@@ -157,6 +195,8 @@ val PolyBoolTest by testSuite {
 //      );
 //    }
 //  },
+}
+//const tests: { name: string, func(): void }[] = [
 //  {
 //    name: 'example',
 //    func: () => {
