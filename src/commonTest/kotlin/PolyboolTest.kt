@@ -1,131 +1,10 @@
 package dev.adamko.polybool
 
-
 import de.infix.testBalloon.framework.testSuite
 import io.kotest.matchers.shouldBe
 
-////
-//// polybool - Boolean operations on polygons (union, intersection, etc)
-//// by Sean Connelly (@velipso), https://sean.fun
-//// Project Home: https://github.com/velipso/polybool
-//// SPDX-License-Identifier: 0BSD
-////
-//
-//import polybool from './polybool';
-//
-//const triangle1 = {
-//  regions: [[
-//    [0, 0],
-//    [5, 10],
-//    [10, 0]
-//  ]],
-//  inverted: false
-//};
-private val triangle1 = Polygon(
-  regions = listOf(
-    listOf(
-      Vec2(0.0, 0.0),
-      Vec2(5.0, 10.0),
-      Vec2(10.0, 0.0),
-    )
-  ),
-  inverted = false,
-)
-
-//const triangle2 = {
-//  regions: [[
-//    [5, 0],
-//    [10, 10],
-//    [15, 0]
-//  ]],
-//  inverted: false
-//};
-private val triangle2 = Polygon(
-  regions = listOf(
-    listOf(
-      Vec2(5.0, 0.0),
-      Vec2(10.0, 10.0),
-      Vec2(15.0, 0.0),
-    )
-  ),
-  inverted = false,
-)
-
-
-//const box1 = {
-//  regions: [[
-//    [0, 0],
-//    [5, 0],
-//    [5, -5],
-//    [0, -5]
-//  ]],
-//  inverted: false
-//};
-private val box1 = Polygon(
-  regions = listOf(
-    listOf(
-      Vec2(0.0, 0.0),
-      Vec2(5.0, 0.0),
-      Vec2(5.0, -5.0),
-      Vec2(0.0, -5.0),
-    ),
-  ),
-  inverted = false,
-)
-
-//const curve1 = {
-//  regions: [[
-//    [0, 0],
-//    [0, -5, 10, -5, 10, 0]
-//  ]],
-//  inverted: false
-//};
-private val curve1 = Polygon(
-  regions = listOf(
-    listOf(
-      Vec2(0.0, 0.0),
-      Vec6(0.0, -5.0, 10.0, -5.0, 10.0, 0.0),
-    )
-  ),
-  inverted = false,
-)
-
-private class Receiver : IPolyBoolReceiver {
-  private val log: ArrayDeque<String> = ArrayDeque()
-
-  override fun beginPath() {
-    this.log.addLast("beginPath")
-  }
-
-  override fun moveTo(x: Double, y: Double) {
-    this.log.addLast("moveTo x:$x y:$y")
-  }
-
-  override fun lineTo(x: Double, y: Double) {
-    this.log.addLast("lineTo x:$x y:$y")
-  }
-
-  override fun bezierCurveTo(
-    cp1x: Double,
-    cp1y: Double,
-    cp2x: Double,
-    cp2y: Double,
-    x: Double,
-    y: Double,
-  ) {
-    this.log.addLast("bezierCurveTo cp1x:$cp1x cp1y:$cp1y cp2x:$cp2x cp2y:$cp2y x:$x y:$y")
-  }
-
-  override fun closePath() {
-    this.log.addLast("closePath")
-  }
-
-  fun done(): List<Any> {
-    return this.log.toList()
-  }
-}
-
 val PolyBoolTest by testSuite {
+
   testSuite("basic intersection") {
     val result = polybool.intersect(triangle1, triangle2)
 
@@ -142,6 +21,7 @@ val PolyBoolTest by testSuite {
       result.inverted shouldBe false
     }
   }
+
   testSuite("basic union") {
     val result = polybool.union(triangle1, triangle2)
 
@@ -160,8 +40,10 @@ val PolyBoolTest by testSuite {
       result.inverted shouldBe false
     }
   }
+
   testSuite("union with curve") {
     val result = polybool.union(box1, curve1)
+
     test("regions") {
       result.regions shouldBe listOf(
         listOf(
@@ -173,10 +55,12 @@ val PolyBoolTest by testSuite {
         )
       )
     }
+
     test("inverted") {
       result.inverted shouldBe false
     }
   }
+
   test("example") {
     val shape1 = polybool.shape()
       .beginPath()
@@ -226,6 +110,7 @@ val PolyBoolTest by testSuite {
       "closePath",
     ).joinToString("\n")
   }
+
   test("transforms") {
     val log = polybool.shape()
       .setTransform(3.0, 0.0, 0.0, 2.0, 100.0, 200.0)
@@ -245,5 +130,85 @@ val PolyBoolTest by testSuite {
       "lineTo x:250.0 y:300.0",
       "closePath",
     ).joinToString("\n")
+  }
+}
+
+
+private val triangle1 = Polygon(
+  regions = listOf(
+    listOf(
+      Vec2(0.0, 0.0),
+      Vec2(5.0, 10.0),
+      Vec2(10.0, 0.0),
+    )
+  ),
+  inverted = false,
+)
+
+private val triangle2 = Polygon(
+  regions = listOf(
+    listOf(
+      Vec2(5.0, 0.0),
+      Vec2(10.0, 10.0),
+      Vec2(15.0, 0.0),
+    )
+  ),
+  inverted = false,
+)
+
+private val box1 = Polygon(
+  regions = listOf(
+    listOf(
+      Vec2(0.0, 0.0),
+      Vec2(5.0, 0.0),
+      Vec2(5.0, -5.0),
+      Vec2(0.0, -5.0),
+    ),
+  ),
+  inverted = false,
+)
+
+private val curve1 = Polygon(
+  regions = listOf(
+    listOf(
+      Vec2(0.0, 0.0),
+      Vec6(0.0, -5.0, 10.0, -5.0, 10.0, 0.0),
+    )
+  ),
+  inverted = false,
+)
+
+private class Receiver : IPolyBoolReceiver {
+  private val log: ArrayDeque<String> = ArrayDeque()
+
+  override fun beginPath() {
+    this.log.addLast("beginPath")
+  }
+
+  override fun moveTo(x: Double, y: Double) {
+    this.log.addLast("moveTo x:$x y:$y")
+  }
+
+  override fun lineTo(x: Double, y: Double) {
+    this.log.addLast("lineTo x:$x y:$y")
+  }
+
+  override fun bezierCurveTo(
+    cp1x: Double,
+    cp1y: Double,
+    cp2x: Double,
+    cp2y: Double,
+    x: Double,
+    y: Double,
+  ) {
+    this.log.addLast("bezierCurveTo cp1x:$cp1x cp1y:$cp1y cp2x:$cp2x cp2y:$cp2y x:$x y:$y")
+  }
+
+  override fun closePath() {
+    this.log.addLast("closePath")
+  }
+
+  fun done(): List<Any> {
+    return this.log.toList()
   }
 }
