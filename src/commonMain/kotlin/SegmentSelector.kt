@@ -38,10 +38,6 @@ internal fun select(
       if (seg.otherFill?.below == true) i += 1
       i
     }
-//      (if (seg.myFill.above == true) 8 else 0) +
-//        (if (seg.myFill.below == true) 4 else 0) +
-//        (if (seg.otherFill?.above == true) 2 else 0) +
-//        (if (seg.otherFill?.below == true) 1 else 0)
     val flags = selection[index]
 //    const above = (flags & 1) !== 0; // bit 1 if filled above
     val above = (flags and 1) != 0 // bit 1 if filled above
@@ -81,9 +77,7 @@ internal fun select(
 }
 
 //export class SegmentSelector {
-object SegmentSelector {
-
-  //@ f o rmatter:off
+internal object SegmentSelector {
   fun union(segments: List<SegmentBool>, log: BuildLog?): List<SegmentBool> {
     // primary | secondary
     // above1 below1 above2 below2    Keep?               Value
@@ -104,18 +98,17 @@ object SegmentSelector {
     //    1      1      1      0   =>   no                  0
     //    1      1      1      1   =>   no                  0
     return select(
-      segments,
-      listOf(
+      segments = segments,
+      selection = listOf(
         4, 2, 1, 0,
         2, 2, 0, 0,
         1, 0, 1, 0,
         0, 0, 0, 0,
       ),
-      log,
+      log = log,
     )
   }
 
-  // prettier-ignore
   fun intersect(
     segments: List<SegmentBool>,
     log: BuildLog?
@@ -139,18 +132,17 @@ object SegmentSelector {
     //    1      1      1      0   =>   yes filled above    1
     //    1      1      1      1   =>   no                  0
     return select(
-      segments,
-      listOf(
+      segments = segments,
+      selection = listOf(
         0, 0, 0, 4,
         0, 2, 0, 2,
         0, 0, 1, 1,
         4, 2, 1, 0,
       ),
-      log,
+      log = log,
     )
   }
 
-  // prettier-ignore
   fun difference(segments: List<SegmentBool>, log: BuildLog?): List<SegmentBool> {
     // primary - secondary
     // above1 below1 above2 below2    Keep?               Value
@@ -183,7 +175,6 @@ object SegmentSelector {
     TODO()
   }
 
-  // prettier-ignore
   fun differenceRev(segments: List<SegmentBool>, log: BuildLog?): List<SegmentBool> {
 //    // secondary - primary
 //    // above1 below1 above2 below2    Keep?               Value
@@ -216,7 +207,6 @@ object SegmentSelector {
     TODO()
   }
 
-  // prettier-ignore
   fun xor(segments: List<SegmentBool>, log: BuildLog?): List<SegmentBool> {
 //    // primary ^ secondary
 //    // above1 below1 above2 below2    Keep?               Value

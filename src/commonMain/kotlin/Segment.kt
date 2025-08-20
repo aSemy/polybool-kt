@@ -255,21 +255,13 @@ data class SegmentLine internal constructor(
     TODO("Not yet implemented")
   }
 
-  override fun start(): Vec2 {
-    return this.p0
-  }
+  override fun start(): Vec2 = this.p0
 
-  override fun start2(): Vec2 {
-    return this.p1
-  }
+  override fun start2(): Vec2 = this.p1
 
-  override fun end2(): Vec2 {
-    return this.p0
-  }
+  override fun end2(): Vec2 = this.p0
 
-  override fun end(): Vec2 {
-    return this.p1
-  }
+  override fun end(): Vec2 = this.p1
 
   override fun boundingBox(): BoundingBox {
     TODO("Not yet implemented")
@@ -281,6 +273,10 @@ data class SegmentLine internal constructor(
 
   override fun isEqual(other: SegmentLine): Boolean {
     TODO("Not yet implemented")
+  }
+
+  override fun toString(): String {
+    return "SegmentLine(p0=${p0.toBracketString()}, p1=${p1.toBracketString()})"
   }
 }
 

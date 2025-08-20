@@ -3,6 +3,7 @@ package dev.adamko.polybool
 import de.infix.testBalloon.framework.testSuite
 import io.kotest.matchers.shouldBe
 
+@Suppress("unused")
 val PolyBoolTest by testSuite {
 
   testSuite("basic intersection") {
@@ -109,6 +110,29 @@ val PolyBoolTest by testSuite {
       "lineTo x:260.0 y:131.25",
       "closePath",
     ).joinToString("\n")
+    /*
+beginPath
+moveTo x:110.0 y:110.0
+lineTo x:50.0 y:50.0
+lineTo x:110.0 y:50.0
+lineTo x:110.0 y:110.0
+closePath
+moveTo x:150.0 y:150.0
+lineTo x:178.0 y:80.0
+lineTo x:130.0 y:50.0
+lineTo x:130.0 y:130.0
+lineTo x:150.0 y:150.0
+closePath
+moveTo x:190.0 y:50.0   <<<
+lineTo x:190.0 y:50.0   <<<
+closePath               <<<
+moveTo x:260.0 y:131.25
+lineTo x:178.0 y:80.0
+lineTo x:190.0 y:50.0
+lineTo x:260.0 y:50.0
+lineTo x:260.0 y:131.25
+closePath
+     */
   }
 
   test("transforms") {
@@ -186,6 +210,7 @@ private class Receiver : IPolyBoolReceiver {
   }
 
   override fun moveTo(x: Double, y: Double) {
+    println("moveTo x:$x y:$y")
     this.log.addLast("moveTo x:$x y:$y")
   }
 

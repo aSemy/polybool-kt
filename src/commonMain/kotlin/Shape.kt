@@ -56,15 +56,18 @@ class Shape internal constructor(
 //    | { state: "seg"; segments: SegmentBool[] }
 //    | { state: "reg"; segments: SegmentBool[]; regions: Segment[][] };
   private var resultState: ResultState = if (segments != null) {
-    ResultState.Seg(segments)
+    ResultState.Segments(segments)
   } else {
     ResultState.New(Intersecter(true, geo, log))
   }
 
   private sealed interface ResultState {
     data class New(val selfIntersect: Intersecter) : ResultState
-    data class Seg(val segments: List<SegmentBool>) : ResultState
-    data class Reg(val segments: List<SegmentBool>, val regions: List<List<Segment>>) : ResultState
+    data class Segments(val segments: List<SegmentBool>) : ResultState
+    data class Regions(
+      val segments: List<SegmentBool>,
+      val regions: List<List<Segment>>,
+    ) : ResultState
   }
 
   companion object {
@@ -428,14 +431,14 @@ class Shape internal constructor(
 //      };
 //    }
     when (val resultState = this.resultState) {
-      is ResultState.New -> {
-        val newResultState = ResultState.Seg(resultState.selfIntersect.calculate())
+      is ResultState.New                                                   -> {
+        val newResultState = ResultState.Segments(resultState.selfIntersect.calculate())
         this.resultState = newResultState
         return newResultState.segments
       }
 
-      is ResultState.Reg -> return resultState.segments
-      is ResultState.Seg -> return resultState.segments
+      is ResultState.Regions                                               -> return resultState.segments
+      is ResultState.Segments -> return resultState.segments
     }
   }
 
@@ -448,16 +451,30 @@ class Shape internal constructor(
 //        regions: SegmentChainer(seg, this.geo, this.log),
 //      };
 //    }
+//    val initialResultState = this.resultState
+//    if (initialResultState !is ResultState.Reg) {
+//      val seg = selfIntersect()
+//      this.resultState = ResultState.Reg(
+//        segments = seg,
+//        regions = SegmentChainer(seg, this.geo, this.log),
+//      )
+//    }
     val initialResultState = this.resultState
-    if (initialResultState !is ResultState.Reg) {
-      val seg = selfIntersect()
-      this.resultState = ResultState.Reg(
-        segments = seg,
-        regions = SegmentChainer(seg, this.geo, this.log),
-      )
-    }
-    val resultState = this.resultState
-    require(resultState is ResultState.Reg)
+    val resultState: ResultState.Regions =
+      if (initialResultState is ResultState.Regions) {
+        initialResultState
+      } else {
+        val seg = selfIntersect()
+        ResultState.Regions(
+          segments = seg,
+          regions = SegmentChainer(
+            segments = seg,
+            geo = this.geo,
+            log = this.log,
+          ),
+        )
+      }
+    this.resultState = resultState
     return resultState.regions
   }
 
@@ -473,15 +490,15 @@ class Shape internal constructor(
 //    for (const seg of this.selfIntersect()) {
 //      int.addSegment(copySegmentBool(seg, this.log), true);
 //    }
-    selfIntersect().forEach {
-      val copy = copySegmentBool(it, log)
+    selfIntersect().forEach { segment ->
+      val copy = copySegmentBool(segment, log)
       int.addSegment(copy, true)
     }
 //    for (const seg of shape.selfIntersect()) {
 //      int.addSegment(copySegmentBool(seg, this.log), false);
 //    }
-    shape.selfIntersect().forEach {
-      val copy = copySegmentBool(it, log)
+    shape.selfIntersect().forEach { segment ->
+      val copy = copySegmentBool(segment, log)
       int.addSegment(copy, false)
     }
     return ShapeCombined(int.calculate(), this.geo, this.log)
@@ -504,9 +521,9 @@ class ShapeCombined(
 
   fun intersect(): Shape {
     return Shape(
-      this.geo,
-      SegmentSelector.intersect(this.segments, this.log),
-      this.log,
+      geo = this.geo,
+      segments = SegmentSelector.intersect(this.segments, this.log),
+      log = this.log,
     )
   }
 

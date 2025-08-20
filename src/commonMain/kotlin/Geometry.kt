@@ -56,9 +56,8 @@ data class Vec2 internal constructor(
       )
   }
 
-  override fun toString(): String {
-    return "Vec2[$x, $y]"
-  }
+  override fun toString(): String = "Vec2${toBracketString()}"
+  fun toBracketString(): String = "[$x, $y]"
 }
 
 //export type Vec6 = [number, number, number, number, number, number];
@@ -217,8 +216,8 @@ abstract class Geometry {
 //
 //
 //}
-data class GeometryEpsilon(
-  private val epsilon: Double = 0.0000000001,
+class GeometryEpsilon(
+  val epsilon: Double = 0.0000000001,
 ) : Geometry() {
 
   override fun snap0(v: Double): Double {
@@ -272,7 +271,7 @@ data class GeometryEpsilon(
 //      return R > 0
 //        ? [-2 * sqrtQ - a / 3, sqrtQ - a / 3]
 //        : [-sqrtQ - a / 3, 2 * sqrtQ - a / 3];
-     return if (R > 0.0) {
+      return if (R > 0.0) {
         DoubleList(-2 * sqrtQ - a / 3, sqrtQ - a / 3)
       } else {
         DoubleList(-sqrtQ - a / 3, 2 * sqrtQ - a / 3)
@@ -356,5 +355,20 @@ data class GeometryEpsilon(
     } else {
       1
     }
+  }
+
+  override fun toString(): String = "GeometryEpsilon(epsilon=$epsilon)"
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is GeometryEpsilon) return false
+
+    if (epsilon != other.epsilon) return false
+
+    return true
+  }
+
+  override fun hashCode(): Int {
+    return epsilon.hashCode()
   }
 }

@@ -40,8 +40,7 @@ class ListBoolTransition<T : Any>(
 )
 
 //export class SegmentBoolBase<T> {
-abstract class SegmentBoolBase<T>(
-) {
+abstract class SegmentBoolBase<T>  {
 //  id: number;
 //  data: T;
 //  myFill: SegmentBoolFill;
@@ -65,7 +64,7 @@ abstract class SegmentBoolBase<T>(
 }
 
 //export class SegmentBoolLine extends SegmentBoolBase<SegmentLine> {}
-class SegmentBoolLine(
+data class SegmentBoolLine(
   override var data: SegmentLine,
   override val fill: SegmentBoolFill? = null,
   override var closed: Boolean = false,
@@ -75,13 +74,13 @@ class SegmentBoolLine(
     below = fill?.below,
   ),
   override var otherFill: SegmentBoolFill? = null,
-  override val id: Int = log?.segmentId() ?: -1,
+//  override val id: Int = log?.segmentId() ?: -1,
 ) :
 //  SegmentBoolBase<SegmentLine>(),
   SegmentBool
 
 //export class SegmentBoolCurve extends SegmentBoolBase<SegmentCurve> {}
-class SegmentBoolCurve(
+data class SegmentBoolCurve(
   override var data: SegmentCurve,
   override val fill: SegmentBoolFill? = null,
   override var closed: Boolean = false,
@@ -91,16 +90,15 @@ class SegmentBoolCurve(
     below = fill?.below,
   ),
   override var otherFill: SegmentBoolFill? = null,
-  override val id: Int = log?.segmentId() ?: -1,
+//  override val id: Int = log?.segmentId() ?: -1,
 ) :
 //  SegmentBoolBase<SegmentLine>(),
-  SegmentBool {
+  SegmentBool
 
-}
 
 //export type SegmentBool = SegmentBoolLine | SegmentBoolCurve;
 sealed interface SegmentBool {
-  val id: Int
+//  val id: Int
 
   val data: Segment
   val fill: SegmentBoolFill?
@@ -797,9 +795,9 @@ class Intersecter internal constructor(
           continue
         }
 
-        //
+
         // calculate fill flags
-        //
+
         if (this.selfIntersection) {
           // are we a toggling edge?
           val toggle: Boolean = if (ev.seg.myFill.below == null) {
@@ -911,7 +909,6 @@ class Intersecter internal constructor(
           val s = ev.seg.myFill
           ev.seg.myFill = evSegOtherFill
           ev.seg.otherFill = s
-//          TODO()
         }
         segments.addLast(ev.seg)
       }

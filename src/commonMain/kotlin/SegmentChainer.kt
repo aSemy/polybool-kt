@@ -202,23 +202,9 @@ internal fun SegmentChainer(
     val closed = segb.closed
 //    const chains = closed ? closedChains : openChains;
     val chains = if (closed) closedChains else openChains
-//    const pt1 = seg.start();
     val pt1 = seg.start()
-//    const pt2 = seg.end();
     val pt2 = seg.end()
 
-    //    const reverseChain = (index: number) => {
-//      log?.chainReverse(index, closed);
-//      const newChain: Segment[] = [];
-//      for (const seg of chains[index].segs) {
-//        newChain.unshift(seg.reverse());
-//      }
-//      chains[index] = {
-//        segs: newChain,
-//        fill: !chains[index].fill,
-//      };
-//      return newChain;
-//    };
     fun reverseChain(index: Int): List<Segment> {
       log?.chainReverse(index, closed)
 //      const newChain: Segment[] = [];
@@ -233,7 +219,10 @@ internal fun SegmentChainer(
 //        segs: newChain,
 //        fill: !chains[index].fill,
 //      };
-      chains[index] = ISegsFill(segs = newChain, fill = !chains[index].fill)
+      chains[index] = ISegsFill(
+        segs = newChain,
+        fill = !chains[index].fill,
+      )
       return newChain
     }
 
@@ -243,19 +232,9 @@ internal fun SegmentChainer(
     }
 
 //    log?.chainStart({ seg, fill: !!segb.myFill.above }, closed);
+    log?.chainStart(BuildLog.ISegFill(seg = seg, fill = segb.myFill.above!!), closed)
 
     // search for two chains that this segment matches
-//    const firstMatch = {
-//      index: 0,
-//      matchesHead: false,
-//      matchesPt1: false,
-//    };
-//    const secondMatch = {
-//      index: 0,
-//      matchesHead: false,
-//      matchesPt1: false,
-//    };
-//    let nextMatch: typeof firstMatch | null = firstMatch;
     data class Match(
       var index: Int = 0,
       var matchesHead: Boolean = false,
@@ -265,24 +244,6 @@ internal fun SegmentChainer(
     val firstMatch = Match()
     val secondMatch = Match()
     var nextMatch: Match? = firstMatch
-    //    function setMatch(
-//      index: number,
-//      matchesHead: boolean,
-//      matchesPt1: boolean,
-//    ) {
-//      // return true if we've matched twice
-//      if (nextMatch) {
-//        nextMatch.index = index;
-//        nextMatch.matchesHead = matchesHead;
-//        nextMatch.matchesPt1 = matchesPt1;
-//      }
-//      if (nextMatch === firstMatch) {
-//        nextMatch = secondMatch;
-//        return false;
-//      }
-//      nextMatch = null;
-//      return true; // we've matched twice, we're done here
-//    }
     fun setMatch(
       index: Int,
       matchesHead: Boolean,
@@ -294,12 +255,14 @@ internal fun SegmentChainer(
         it.matchesHead = matchesHead
         it.matchesPt1 = matchesPt1
       }
-      if (nextMatch == firstMatch) {
+      return if (nextMatch == firstMatch) {
         nextMatch = secondMatch
-        return false
+        false
+      } else {
+        nextMatch = null
+        // we've matched twice, we're done here
+        true
       }
-      nextMatch = null
-      return true // we've matched twice, we're done here
     }
 
 
@@ -350,11 +313,8 @@ internal fun SegmentChainer(
 
     if (nextMatch == firstMatch) {
       // we didn't match anything, so create a new chain
-//      const fill = !!segb.myFill.above;
-      val fill = segb.myFill.above!!
-//      chains.push({ segs: [seg], fill });
+      val fill = segb.myFill.above ?: false
       chains.add(ISegsFill(listOf(seg), fill))
-//      log?.chainNew({ seg, fill }, closed);
       log?.chainNew(BuildLog.ISegFill(seg, fill), closed)
     } else if (nextMatch == secondMatch) {
       // we matched a single chain
@@ -367,19 +327,19 @@ internal fun SegmentChainer(
       if (firstMatch.matchesHead) {
         if (firstMatch.matchesPt1) {
           seg = seg.reverse()
-//          log?.chainAddHead(index, { seg, fill }, closed);
+          log?.chainAddHead(index, BuildLog.ISegFill(seg, chain.fill), closed)
           chain.segs.addFirst(seg)
         } else {
-//          log?.chainAddHead(index, { seg, fill }, closed);
+          log?.chainAddHead(index, BuildLog.ISegFill(seg, chain.fill), closed)
           chain.segs.addFirst(seg)
         }
       } else {
         if (firstMatch.matchesPt1) {
-//          log?.chainAddTail(index, { seg, fill }, closed);
+          log?.chainAddTail(index, BuildLog.ISegFill(seg, chain.fill), closed)
           chain.segs.addLast(seg)
         } else {
           seg = seg.reverse()
-          //log?.chainAddTail(index, { seg, fill }, closed);
+          log?.chainAddTail(index, BuildLog.ISegFill(seg, chain.fill), closed)
           chain.segs.addLast(seg)
         }
       }
@@ -392,7 +352,7 @@ internal fun SegmentChainer(
           chain.segs.removeFirst()
 //          chain[0] = newSeg;
           chain.segs[0] = newSeg
-//          log?.chainSimplifyHead(index, { seg: newSeg, fill }, closed);
+          log?.chainSimplifyHead(index, BuildLog.ISegFill(newSeg, chain.fill), closed)
         }
       } else {
 //        const next = chain[chain.length - 2];
@@ -401,17 +361,17 @@ internal fun SegmentChainer(
         if (newSeg != null) {
           chain.segs.removeLast()
           chain.segs[chain.size - 1] = newSeg
-//          log?.chainSimplifyTail(index, { seg: newSeg, fill }, closed);
+          log?.chainSimplifyTail(index, BuildLog.ISegFill(newSeg, chain.fill), closed)
         }
       }
 
       // check for closed chain
       if (closed) {
         var finalChain = chain.segs
-        var segS = finalChain[0]
-        var segE = finalChain[finalChain.size - 1]
+        var segS = finalChain.first()
+        var segE = finalChain.last()
         if (
-          finalChain.size > 0 &&
+          finalChain.isNotEmpty() &&
           geo.isEqualVec2(segS.start(), segE.end())
         ) {
           // see if chain is clockwise
@@ -434,7 +394,7 @@ internal fun SegmentChainer(
           if (newStart != null) {
             finalChain.removeLast()
             finalChain[0] = newStart
-//            log?.chainSimplifyClose(index, { seg: newStart, fill }, closed);
+            log?.chainSimplifyClose(index, BuildLog.ISegFill(newStart, chain.fill), closed)
           }
 
           // we have a closed chain!
@@ -442,7 +402,6 @@ internal fun SegmentChainer(
 //          chains.splice(index, 1);
           chains.removeAt(index)
           regions.addLast(finalChain)
-//          TODO()
         }
       }
     } else {
@@ -576,6 +535,7 @@ fun <T : IPolyBoolReceiver> segmentsToReceiver(
   receiver: T,
   matrix: Vec6,
 ): T {
+  println("[segmentsToReceiver] segments:$segments")
   val (a, b, c, d, e, f) = matrix
   receiver.beginPath()
   for (region in segments) {
