@@ -31,6 +31,14 @@ kotlin {
         implementation("de.infix.testBalloon:testBalloon-integration-kotest-assertions:0.6.0-K2.2.0")
 
         implementation("io.kotest:kotest-assertions-core:6.0.0")
+
+        implementation(kotlin("test"))
+      }
+    }
+    jvmTest {
+      dependencies {
+        implementation("org.graalvm.polyglot:polyglot:24.2.2")
+        implementation("org.graalvm.polyglot:js:24.2.2")
       }
     }
   }
