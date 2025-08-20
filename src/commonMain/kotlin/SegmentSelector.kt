@@ -151,7 +151,7 @@ object SegmentSelector {
   }
 
   // prettier-ignore
-  fun difference(segments: List<SegmentBool>, log: BuildLog?) {
+  fun difference(segments: List<SegmentBool>, log: BuildLog?): List<SegmentBool> {
     // primary - secondary
     // above1 below1 above2 below2    Keep?               Value
     //    0      0      0      0   =>   yes if open         4
@@ -184,7 +184,7 @@ object SegmentSelector {
   }
 
   // prettier-ignore
-  fun differenceRev(segments: List<SegmentBool>, log: BuildLog?) {
+  fun differenceRev(segments: List<SegmentBool>, log: BuildLog?): List<SegmentBool> {
 //    // secondary - primary
 //    // above1 below1 above2 below2    Keep?               Value
 //    //    0      0      0      0   =>   yes if open         4
@@ -217,7 +217,7 @@ object SegmentSelector {
   }
 
   // prettier-ignore
-  fun xor(segments: List<SegmentBool>, log: BuildLog?) {
+  fun xor(segments: List<SegmentBool>, log: BuildLog?): List<SegmentBool> {
 //    // primary ^ secondary
 //    // above1 below1 above2 below2    Keep?               Value
 //    //    0      0      0      0   =>   yes if open         4

@@ -310,7 +310,6 @@ class Shape internal constructor(
       current = current,
     )
     return this
-//    TODO()
   }
 
   fun lineTo(x: Double, y: Double): Shape {
@@ -512,29 +511,26 @@ class ShapeCombined(
   }
 
   fun difference(): Shape {
-//    return new Shape(
-//      this.geo,
-//      SegmentSelector.difference(this.segments, this.log),
-//      this.log,
-//    );
-    TODO()
+    return Shape(
+      geo = this.geo,
+      segments = SegmentSelector.difference(this.segments, this.log),
+      log = this.log,
+    )
   }
 
   fun differenceRev(): Shape {
-//    return new Shape(
-//      this.geo,
-//      SegmentSelector.differenceRev(this.segments, this.log),
-//      this.log,
-//    );
-    TODO()
+    return Shape(
+      geo = this.geo,
+      segments = SegmentSelector.differenceRev(this.segments, this.log),
+      log = this.log,
+    )
   }
 
   fun xor(): Shape {
-//    return new Shape(
-//      this.geo,
-//      SegmentSelector.xor(this.segments, this.log),
-//      this.log,
-//    );
-    TODO()
+    return Shape(
+      geo = this.geo,
+      segments = SegmentSelector.xor(this.segments, this.log),
+      log = this.log,
+    )
   }
 }
