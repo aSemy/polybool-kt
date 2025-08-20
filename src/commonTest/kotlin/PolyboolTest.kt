@@ -119,42 +119,26 @@ val PolyBoolTest by testSuite {
       result.inverted shouldBe false
     }
   }
+  testSuite("basic union") {
+    val result = polybool.union(triangle1, triangle2)
+
+    test("regions") {
+      result.regions shouldBe listOf(
+        listOf(
+          Vec2(10.0, 10.0),
+          Vec2(7.5, 5.0),
+          Vec2(5.0, 10.0),
+          Vec2(0.0, 0.0),
+          Vec2(15.0, 0.0)
+        )
+      )
+    }
+    test("inverted") {
+      result.inverted shouldBe false
+    }
+  }
 }
 //const tests: { name: string, func(): void }[] = [
-//  {
-//    name: 'basic intersection',
-//    func: () => {
-//      assertEqual(
-//        polybool.intersect(triangle1, triangle2),
-//        {
-//          regions: [[
-//            [10, 0],
-//            [5, 0],
-//            [7.5, 5]
-//          ]],
-//          inverted: false
-//        }
-//      );
-//    }
-//  },
-//  {
-//    name: 'basic union',
-//    func: () => {
-//      assertEqual(
-//        polybool.union(triangle1, triangle2),
-//        {
-//          regions: [[
-//            [10, 10],
-//            [7.5, 5],
-//            [5, 10],
-//            [0, 0],
-//            [15, 0]
-//          ]],
-//          inverted: false
-//        }
-//      );
-//    }
-//  },
 //  {
 //    name: 'union with curve',
 //    func: () => {

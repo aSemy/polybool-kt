@@ -493,12 +493,11 @@ class ShapeCombined(
 ) {
 
   fun union(): Shape {
-//    return new Shape(
-//      this.geo,
-//      SegmentSelector.union(this.segments, this.log),
-//      this.log,
-//    );
-    TODO()
+    return Shape(
+      geo = this.geo,
+      segments = SegmentSelector.union(this.segments, this.log),
+      log = this.log,
+    )
   }
 
   fun intersect(): Shape {

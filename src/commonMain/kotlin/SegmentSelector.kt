@@ -82,7 +82,7 @@ internal fun select(
 object SegmentSelector {
 
   //@ f o rmatter:off
-  fun union(segments: List<SegmentBool>, log: BuildLog?) {
+  fun union(segments: List<SegmentBool>, log: BuildLog?): List<SegmentBool> {
     // primary | secondary
     // above1 below1 above2 below2    Keep?               Value
     //    0      0      0      0   =>   yes if open         4
@@ -101,17 +101,16 @@ object SegmentSelector {
     //    1      1      0      1   =>   no                  0
     //    1      1      1      0   =>   no                  0
     //    1      1      1      1   =>   no                  0
-//    return select(
-//      segments,
-//      [
-//        4, 2, 1, 0,
-//        2, 2, 0, 0,
-//        1, 0, 1, 0,
-//        0, 0, 0, 0
-//      ],
-//      log,
-//    );
-    TODO()
+    return select(
+      segments,
+      listOf(
+        4, 2, 1, 0,
+        2, 2, 0, 0,
+        1, 0, 1, 0,
+        0, 0, 0, 0,
+      ),
+      log,
+    )
   }
 
   // prettier-ignore
@@ -143,7 +142,7 @@ object SegmentSelector {
         0, 0, 0, 4,
         0, 2, 0, 2,
         0, 0, 1, 1,
-        4, 2, 1, 0
+        4, 2, 1, 0,
       ),
       log,
     )

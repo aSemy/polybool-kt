@@ -56,6 +56,7 @@ data class Vec2 internal constructor(
     return "Vec2[$x, $y]"
   }
 }
+
 //export type Vec6 = [number, number, number, number, number, number];
 data class Vec6 internal constructor(
   val a: Double,

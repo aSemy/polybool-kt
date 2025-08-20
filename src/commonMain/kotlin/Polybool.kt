@@ -130,7 +130,22 @@ class PolyBool(
 //          : combined.shape.union(),
 //      inverted: combined.inverted1 || combined.inverted2,
 //    };
-    TODO()
+    return Segments(
+      shape = if (combined.inverted1) {
+        if (combined.inverted2) {
+          combined.shape.intersect()
+        } else {
+          combined.shape.difference()
+        }
+      } else {
+        if (combined.inverted2) {
+          combined.shape.differenceRev()
+        } else {
+          combined.shape.union()
+        }
+      },
+      inverted = combined.inverted1 || combined.inverted2,
+    )
   }
 
   fun selectIntersect(combined: CombinedSegments): Segments {
@@ -239,12 +254,11 @@ class PolyBool(
 
   // helper functions for common operations
   fun union(poly1: Polygon, poly2: Polygon): Polygon {
-//    const seg1 = this.segments(poly1);
-//    const seg2 = this.segments(poly2);
-//    const comb = this.combine(seg1, seg2);
-//    const seg3 = this.selectUnion(comb);
-//    return this.polygon(seg3);
-    TODO()
+    val seg1 = this.segments(poly1);
+    val seg2 = this.segments(poly2);
+    val comb = this.combine(seg1, seg2);
+    val seg3 = this.selectUnion(comb);
+    return this.polygon(seg3);
   }
 
   //  intersect(poly1: Polygon, poly2: Polygon): Polygon {

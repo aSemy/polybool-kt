@@ -395,13 +395,13 @@ internal fun SegmentChainer(
         }
       } else {
 //        const next = chain[chain.length - 2];
-//        const newSeg = joinSegments(next, seg, geo);
-//        if (newSeg) {
-//          chain.pop();
-//          chain[chain.length - 1] = newSeg;
+        val next = chain[chain.size - 2]
+        val newSeg = joinSegments(next, seg, geo)
+        if (newSeg != null) {
+          chain.segs.removeLast()
+          chain.segs[chain.size - 1] = newSeg
 //          log?.chainSimplifyTail(index, { seg: newSeg, fill }, closed);
-//        }
-        TODO()
+        }
       }
 
       // check for closed chain
