@@ -1,6 +1,6 @@
 plugins {
   kotlin("multiplatform") version "2.2.0"
-  id("de.infix.testBalloon") version "0.5.0-K2.2.0"
+  id("de.infix.testBalloon") version "0.6.0-K2.2.0"
 }
 
 
@@ -27,8 +27,8 @@ kotlin {
   sourceSets {
     commonTest {
       dependencies {
-        implementation("de.infix.testBalloon:testBalloon-framework-core:0.5.0-K2.2.0")
-        implementation("de.infix.testBalloon:testBalloon-integration-kotest-assertions:0.5.0-K2.2.0")
+        implementation("de.infix.testBalloon:testBalloon-framework-core:0.6.0-K2.2.0")
+        implementation("de.infix.testBalloon:testBalloon-integration-kotest-assertions:0.6.0-K2.2.0")
 
         implementation("io.kotest:kotest-assertions-core:6.0.0")
       }
