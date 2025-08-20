@@ -95,7 +95,6 @@ class Shape internal constructor(
 //    }
 //  }
 
-
   fun setTransform(
     a: Double,
     b: Double,
@@ -103,21 +102,17 @@ class Shape internal constructor(
     d: Double,
     e: Double,
     f: Double,
-  ) {
-//    if (this.resultState.state !== "new") {
-//      throw new Error(
-//        "PolyBool: Cannot change shape after using it in an operation",
-//      );
-//    }
-//    this.matrix = [a, b, c, d, e, f];
-//    return this;
-    TODO()
+  ): Shape {
+    require(this.resultState is ResultState.New) {
+      "Cannot change shape after using it in an operation"
+    }
+    this.matrix = Vec6(a, b, c, d, e, f)
+    return this
   }
 
-  fun resetTransform() {
-//    this.matrix = [1, 0, 0, 1, 0, 0];
-//    return this;
-    TODO()
+  fun resetTransform(): Shape {
+    this.matrix = Vec6(1, 0, 0, 1, 0, 0)
+    return this
   }
 
   fun getTransform(): Vec6 {
@@ -374,14 +369,14 @@ class Shape internal constructor(
     require(pathState is IPathState.MoveTo) {
       "Must call moveTo prior to calling bezierCurveTo"
     }
-    val current = this.transformPoint(x, y);
+    val current = this.transformPoint(x, y)
     resultState.selfIntersect.addCurve(
       from = pathState.current,
       c1 = this.transformPoint(cp1x, cp1y),
       c2 = this.transformPoint(cp2x, cp2y),
       to = current,
-    );
-    pathState.current = current;
+    )
+    pathState.current = current
     return this
   }
 
@@ -402,12 +397,11 @@ class Shape internal constructor(
 //      this.pathState.kind === "moveTo" &&
 //      !this.geo.isEqualVec2(this.pathState.start, this.pathState.current)
     ) {
-//      this.resultState.selfIntersect.addLine(
-//        this.pathState.current,
-//        this.pathState.start,
-//      );
-//      this.pathState.current = this.pathState.start;
-      TODO()
+      state.selfIntersect.addLine(
+        from = pathState.current,
+        to = pathState.start,
+      )
+      pathState.current = pathState.start
     }
     state.selfIntersect.closePath()
     return this.endPath()
