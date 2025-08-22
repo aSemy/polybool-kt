@@ -4,6 +4,9 @@ import io.kotest.matchers.shouldBe
 import kotlin.io.path.Path
 import kotlin.io.path.readText
 import kotlin.test.Test
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.jsonArray
 import org.graalvm.polyglot.Context
 import org.graalvm.polyglot.Source
 import org.graalvm.polyglot.Value
@@ -23,18 +26,152 @@ class SegmentChainerTest {
       )
     )
 
-    val ktResult = kotlin.runCatching {   SegmentChainer(
-      segments,
-      geo,
-      null,
-    )  }.getOrNull()
+    val ktResult = runCatching {
+      SegmentChainer(
+        segments,
+        geo,
+        null,
+      )
+    }.getOrNull()
+
+    val ktResultStr = ktResult?.toJsonString()
 
     val jsResult = segmentChainerJs(segments, geo)
+    val jsResultObj = json.encodeToString(JsonArray.serializer(), json.parseToJsonElement(jsResult).jsonArray)
 
-    ktResult shouldBe jsResult
+    ktResultStr shouldBe jsResultObj
+  }
+
+  @Test
+  fun test2() {
+    val geo = GeometryEpsilon()
+    val segments = listOf(
+      SegmentBoolLine(
+        SegmentLine(p0 = Vec2(50.0, 50.0), p1 = Vec2(110.0, 50.0), geo = geo),
+        SegmentBoolFill(above = true, below = false),
+        closed = true,
+        null,
+        myFill = SegmentBoolFill(above = true, below = false),
+        null
+      ),
+      SegmentBoolLine(
+        SegmentLine(p0 = Vec2(110.0, 50.0), p1 = Vec2(110.0, 110.0), geo = geo),
+        SegmentBoolFill(above = true, below = false),
+        closed = true,
+        null,
+        myFill = SegmentBoolFill(above = true, below = false),
+        null
+      ),
+      SegmentBoolLine(
+        SegmentLine(p0 = Vec2(50.0, 50.0), p1 = Vec2(110.0, 110.0), geo = geo),
+        SegmentBoolFill(above = false, below = true),
+        closed = true,
+        null,
+        myFill = SegmentBoolFill(above = false, below = true),
+        null
+      ),
+      SegmentBoolLine(
+        SegmentLine(p0 = Vec2(130.0, 50.0), p1 = Vec2(130.0, 130.0), geo = geo),
+        SegmentBoolFill(above = false, below = true),
+        closed = true,
+        null,
+        myFill = SegmentBoolFill(above = false, below = true),
+        null
+      ),
+      SegmentBoolLine(
+        SegmentLine(p0 = Vec2(130.0, 130.0), p1 = Vec2(150.0, 150.0), geo = geo),
+        SegmentBoolFill(above = false, below = true),
+        closed = true,
+        null,
+        myFill = SegmentBoolFill(above = false, below = true),
+        null
+      ),
+      SegmentBoolLine(
+        SegmentLine(p0 = Vec2(130.0, 50.0), p1 = Vec2(178.0, 80.0), geo = geo),
+        SegmentBoolFill(above = true, below = false),
+        closed = true,
+        null,
+        myFill = SegmentBoolFill(above = true, below = false),
+        null
+      ),
+      SegmentBoolLine(
+        SegmentLine(p0 = Vec2(150.0, 150.0), p1 = Vec2(178.0, 80.0), geo = geo),
+        SegmentBoolFill(above = false, below = true),
+        closed = true,
+        null,
+        myFill = SegmentBoolFill(above = false, below = true),
+        null
+      ),
+      SegmentBoolLine(
+        SegmentLine(p0 = Vec2(130.0, 50.0), p1 = Vec2(190.0, 50.0), geo = geo),
+        SegmentBoolFill(above = true, below = false),
+        closed = true,
+        null,
+        myFill = SegmentBoolFill(above = true, below = false),
+        null
+      ),
+      SegmentBoolLine(
+        SegmentLine(p0 = Vec2(130.0, 50.0), p1 = Vec2(190.0, 50.0), geo = geo),
+        SegmentBoolFill(above = false, below = true),
+        closed = true,
+        null,
+        myFill = SegmentBoolFill(above = false, below = true),
+        null
+      ),
+      SegmentBoolLine(
+        SegmentLine(p0 = Vec2(178.0, 80.0), p1 = Vec2(190.0, 50.0), geo = geo),
+        SegmentBoolFill(above = true, below = false),
+        closed = true,
+        null,
+        myFill = SegmentBoolFill(above = true, below = false),
+        null
+      ),
+      SegmentBoolLine(
+        SegmentLine(p0 = Vec2(190.0, 50.0), p1 = Vec2(260.0, 50.0), geo = geo),
+        SegmentBoolFill(above = true, below = false),
+        closed = true,
+        null,
+        myFill = SegmentBoolFill(above = true, below = false),
+        null
+      ),
+      SegmentBoolLine(
+        SegmentLine(p0 = Vec2(260.0, 50.0), p1 = Vec2(260.0, 131.25), geo = geo),
+        SegmentBoolFill(above = true, below = false),
+        closed = true,
+        null,
+        myFill = SegmentBoolFill(above = true, below = false),
+        null
+      ),
+      SegmentBoolLine(
+        SegmentLine(p0 = Vec2(178.0, 80.0), p1 = Vec2(260.0, 131.25), geo = geo),
+        SegmentBoolFill(above = false, below = true),
+        closed = true,
+        null,
+        myFill = SegmentBoolFill(above = false, below = true),
+        null
+      ),
+    )
+
+    val ktResult = kotlin.runCatching {
+      SegmentChainer(
+        segments,
+        geo,
+        null,
+      )
+    }.getOrNull()
+
+    val ktResultStr = ktResult?.toJsonString()
+    val jsResult = segmentChainerJs(segments, geo)
+    val jsResultObj = json.encodeToString(JsonArray.serializer(), json.parseToJsonElement(jsResult).jsonArray)
+
+    ktResultStr shouldBe jsResultObj
   }
 
   companion object {
+    private val json = Json {
+      prettyPrint = true
+      allowTrailingComma = true
+    }
 
     private fun segmentChainerJs(
       segments: List<SegmentBool>,
@@ -72,6 +209,37 @@ class SegmentChainerTest {
         }
     }
 
+    private fun List<List<Segment>>.toJsonString(): String {
+      val str = buildString {
+        append("[")
+        this@toJsonString.forEach { segment ->
+          append("[")
+          segment.forEach { seg ->
+            append("{")
+            when (seg) {
+              is SegmentCurve -> TODO()
+              is SegmentLine  -> {
+                append("\"p0\":[${seg.p0.x},${seg.p0.y}],")
+                append("\"p1\":[${seg.p1.x},${seg.p1.y}],")
+                val geo = seg.geo
+                require(geo is GeometryEpsilon) { "expected GeometryEpsilon, got $geo" }
+                append("\"geo\":{\"epsilon\":${geo.epsilon}}")
+              }
+            }
+            append("}")
+//            if (segment.last() != seg)
+            append(",")
+          }
+          append("]")
+          append(",")
+        }
+        append("]")
+      }
+
+      return json.encodeToString(JsonArray.serializer(), json.parseToJsonElement(str).jsonArray)
+        .replace(".0", "")
+//        .replace("1.0", "1")
+    }
   }
 }
 

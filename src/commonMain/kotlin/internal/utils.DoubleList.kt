@@ -8,7 +8,7 @@ import kotlin.jvm.JvmInline
 @JvmInline
 value class DoubleList internal constructor(
   private val content: DoubleArray
-): Collection<Double> {
+) : Collection<Double> {
   override val size: Int
     get() = content.size
 
@@ -84,9 +84,7 @@ private class DoubleListIterator(
   private var index: Int,
 ) : ListIterator<Double> {
 
-  override fun hasNext(): Boolean {
-    return index < content.size - 1
-  }
+  override fun hasNext(): Boolean = index < content.size - 1
 
   override fun hasPrevious(): Boolean = index > 0
 

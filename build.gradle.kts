@@ -1,5 +1,6 @@
 plugins {
-  kotlin("multiplatform") version "2.2.0"
+  kotlin("multiplatform") version "2.2.10"
+  kotlin("plugin.serialization") version "2.2.10"
   id("de.infix.testBalloon") version "0.6.0-K2.2.0"
 }
 
@@ -25,6 +26,11 @@ kotlin {
     )
   }
   sourceSets {
+    commonMain {
+      dependencies {
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+      }
+    }
     commonTest {
       dependencies {
         implementation("de.infix.testBalloon:testBalloon-framework-core:0.6.0-K2.2.0")
@@ -39,6 +45,8 @@ kotlin {
       dependencies {
         implementation("org.graalvm.polyglot:polyglot:24.2.2")
         implementation("org.graalvm.polyglot:js:24.2.2")
+
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
       }
     }
   }

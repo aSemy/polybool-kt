@@ -209,16 +209,9 @@ internal fun SegmentChainer(
       log?.chainReverse(index, closed)
 //      const newChain: Segment[] = [];
       val newChain = ArrayDeque<Segment>()
-//      for (const seg of chains[index].segs) {
-//        newChain.unshift(seg.reverse());
-//      }
       for (seg in chains[index]) {
         newChain.addFirst(seg.reverse())
       }
-//      chains[index] = {
-//        segs: newChain,
-//        fill: !chains[index].fill,
-//      };
       chains[index] = ISegsFill(
         segs = newChain,
         fill = !chains[index].fill,
@@ -265,55 +258,37 @@ internal fun SegmentChainer(
       }
     }
 
-
-//    for (let i = 0; i < chains.length; i++) {
-//      const chain = chains[i].segs;
-//      const head = chain[0].start();
-//      const tail = chain[chain.length - 1].end();
-//      if (geo.isEqualVec2(head, pt1)) {
-//        if (setMatch(i, true, true)) {
-//          break;
-//        }
-//      } else if (geo.isEqualVec2(head, pt2)) {
-//        if (setMatch(i, true, false)) {
-//          break;
-//        }
-//      } else if (geo.isEqualVec2(tail, pt1)) {
-//        if (setMatch(i, false, true)) {
-//          break;
-//        }
-//      } else if (geo.isEqualVec2(tail, pt2)) {
-//        if (setMatch(i, false, false)) {
-//          break;
-//        }
-//      }
-//    }
     for (i in chains.indices) {
       val chain = chains[i].segs
       val head = chain.first().start()
       val tail = chain.last().end()
-      if (geo.isEqualVec2(head, pt1)) {
-        if (setMatch(i, matchesHead = true, matchesPt1 = true)) {
-          break
+      when {
+        geo.isEqualVec2(head, pt1) -> {
+          if (setMatch(i, matchesHead = true, matchesPt1 = true)) {
+            break
+          }
         }
-      } else if (geo.isEqualVec2(head, pt2)) {
-        if (setMatch(i, matchesHead = true, matchesPt1 = false)) {
-          break
+        geo.isEqualVec2(head, pt2) -> {
+          if (setMatch(i, matchesHead = true, matchesPt1 = false)) {
+            break
+          }
         }
-      } else if (geo.isEqualVec2(tail, pt1)) {
-        if (setMatch(i, matchesHead = false, matchesPt1 = true)) {
-          break
+        geo.isEqualVec2(tail, pt1) -> {
+          if (setMatch(i, matchesHead = false, matchesPt1 = true)) {
+            break
+          }
         }
-      } else if (geo.isEqualVec2(tail, pt2)) {
-        if (setMatch(i, matchesHead = false, matchesPt1 = false)) {
-          break
+        geo.isEqualVec2(tail, pt2) -> {
+          if (setMatch(i, matchesHead = false, matchesPt1 = false)) {
+            break
+          }
         }
       }
     }
 
     if (nextMatch == firstMatch) {
       // we didn't match anything, so create a new chain
-      val fill = segb.myFill.above ?: false
+      val fill = segb.myFill.above == true
       chains.add(ISegsFill(listOf(seg), fill))
       log?.chainNew(BuildLog.ISegFill(seg, fill), closed)
     } else if (nextMatch == secondMatch) {
@@ -399,7 +374,6 @@ internal fun SegmentChainer(
 
           // we have a closed chain!
           log?.chainClose(index, closed)
-//          chains.splice(index, 1);
           chains.removeAt(index)
           regions.addLast(finalChain)
         }

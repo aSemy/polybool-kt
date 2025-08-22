@@ -1,34 +1,22 @@
 package dev.adamko.polybool
 
-////
-//// polybool - Boolean operations on polygons (union, intersection, etc)
-//// by Sean Connelly (@velipso), https://sean.fun
-//// Project Home: https://github.com/velipso/polybool
-//// SPDX-License-Identifier: 0BSD
-////
-//
-//import { type SegmentBool } from "./Intersecter";
-//import { type Vec2 } from "./Geometry";
-//import { type Segment } from "./Segment";
-
-//interface ISegFill {
-//  seg: Segment;
-//  fill: boolean;
-//}
+import kotlinx.serialization.Serializable
 
 private typealias unknown = Any
 
 //export default class BuildLog {
 class BuildLog {
-    class ISegFill(
-    val seg:  Segment ,
+
+  @Serializable
+  data class ISegFill(
+    val seg: Segment,
     val fill: Boolean,
   )
 
-
   //  list: Array<{ type: String; data: unknown }> = [];
-  private var nextSegmentId = 0;
-//  curVert = NaN;
+  private val list: ArrayDeque<String> = ArrayDeque()
+  private var nextSegmentId = 0
+  private var curVert: Double? = Double.NaN
 
   fun push(type: String, data: unknown) {
 //    this.list.push({
@@ -38,13 +26,13 @@ class BuildLog {
     TODO()
   }
 
-  fun info(msg: String, data: Any? = null) {
+  fun info(msg: String, data: String? = null) {
 //    this.push("info", { msg, data });
     TODO()
   }
 
   fun segmentId(): Int {
-    return this.nextSegmentId++;
+    return this.nextSegmentId++
   }
 
   fun checkIntersection(seg1: SegmentBool, seg2: SegmentBool) {
@@ -52,25 +40,25 @@ class BuildLog {
     TODO()
   }
 
- fun  segmentDivide(seg: SegmentBool, p: Vec2) {
+  fun segmentDivide(seg: SegmentBool, p: Vec2) {
 //    this.push("div_seg", { seg, p });
-  TODO()
-   }
+    TODO()
+  }
 
- fun  segmentChop(seg: SegmentBool) {
+  fun segmentChop(seg: SegmentBool) {
 //    this.push("chop", { seg });
-  TODO()
-   }
+    TODO()
+  }
 
   fun statusRemove(seg: SegmentBool) {
 //    this.push("pop_seg", { seg });
-  TODO()
-   }
+    TODO()
+  }
 
   fun segmentUpdate(seg: SegmentBool) {
 //    this.push("seg_update", { seg });
-  TODO()
-   }
+    TODO()
+  }
 
   internal fun segmentNew(seg: SegmentBool, primary: Boolean) {
 //    this.push("new_seg", { seg, primary });
@@ -105,7 +93,7 @@ class BuildLog {
   }
 
   internal fun vert(x: Double?) {
-//    if (x !== this.curVert) {
+//    if (x != this.curVert) {
 //      this.push("vert", { x });
 //      this.curVert = x;
 //    }

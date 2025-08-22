@@ -238,21 +238,16 @@ class GeometryEpsilon(
     return v
   }
 
-  //  isCollinear(p1: Vec2, p2: Vec2, p3: Vec2)
   override fun isCollinear(p1: Vec2, p2: Vec2, p3: Vec2): Boolean {
     // does pt1->pt2->pt3 make a straight line?
     // essentially this is just checking to see if
     //   slope(pt1->pt2) === slope(pt2->pt3)
     // if slopes are equal, then they must be collinear, because they share pt2
-//    const dx1 = p1[0] - p2[0];
-//    const dy1 = p1[1] - p2[1];
-//    const dx2 = p2[0] - p3[0];
-//    const dy2 = p2[1] - p3[1];
-    val dx1 = p1[0] - p2[0]
-    val dy1 = p1[1] - p2[1]
-    val dx2 = p2[0] - p3[0]
-    val dy2 = p2[1] - p3[1]
-    return abs(dx1 * dy2 - dx2 * dy1) < this.epsilon
+    val dx1 = p1.x - p2.x
+    val dy1 = p1.y - p2.y
+    val dx2 = p2.x - p3.x
+    val dy2 = p2.y - p3.y
+    return abs(dx1 * dy2 - dx2 * dy1) < epsilon
   }
 
   private fun solveCubicNormalized(a: Double, b: Double, c: Double): DoubleList {
@@ -341,16 +336,15 @@ class GeometryEpsilon(
 
   /** returns `-1` if [a] is smaller, `1` if [b] is smaller, [0] if equal. */
   override fun compareVec2(a: Vec2, b: Vec2): Int {
-    if (abs(b.x - a.x) < this.epsilon) {
-      return if (abs(b.y - a.y) < this.epsilon) {
+    return if (abs(b.x - a.x) < this.epsilon) {
+      if (abs(b.y - a.y) < this.epsilon) {
         0
       } else if (a.y < b.y) {
         -1
       } else {
         1
       }
-    }
-    return if (a.x < b.x) {
+    } else if (a.x < b.x) {
       -1
     } else {
       1
