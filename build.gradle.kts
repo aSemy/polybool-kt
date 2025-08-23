@@ -51,3 +51,11 @@ kotlin {
     }
   }
 }
+
+tasks.withType<Test>().configureEach {
+  // https://www.graalvm.org/latest/reference-manual/embed-languages/#runtime-optimization-support
+  jvmArgs(
+    "-XX:+UnlockExperimentalVMOptions",
+    "-XX:+EnableJVMCI",
+    )
+}

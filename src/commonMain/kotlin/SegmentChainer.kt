@@ -189,9 +189,6 @@ internal fun SegmentChainer(
   geo: Geometry,
   log: BuildLog?,
 ): List<List<Segment>> {
-//  const closedChains: ISegsFill[] = [];
-//  const openChains: ISegsFill[] = [];
-//  const regions: Segment[][] = [];
 
   val closedChains = ArrayDeque<ISegsFill>()
   val openChains = ArrayDeque<ISegsFill>()
@@ -200,14 +197,12 @@ internal fun SegmentChainer(
   for (segb in segments) {
     var seg = segb.data
     val closed = segb.closed
-//    const chains = closed ? closedChains : openChains;
     val chains = if (closed) closedChains else openChains
     val pt1 = seg.start()
     val pt2 = seg.end()
 
     fun reverseChain(index: Int): List<Segment> {
       log?.chainReverse(index, closed)
-//      const newChain: Segment[] = [];
       val newChain = ArrayDeque<Segment>()
       for (seg in chains[index]) {
         newChain.addFirst(seg.reverse())
@@ -224,8 +219,7 @@ internal fun SegmentChainer(
       continue
     }
 
-//    log?.chainStart({ seg, fill: !!segb.myFill.above }, closed);
-    log?.chainStart(BuildLog.ISegFill(seg = seg, fill = segb.myFill.above!!), closed)
+    log?.chainStart(BuildLog.ISegFill(seg = seg, fill = segb.myFill.above == true), closed)
 
     // search for two chains that this segment matches
     data class Match(
@@ -268,16 +262,19 @@ internal fun SegmentChainer(
             break
           }
         }
+
         geo.isEqualVec2(head, pt2) -> {
           if (setMatch(i, matchesHead = true, matchesPt1 = false)) {
             break
           }
         }
+
         geo.isEqualVec2(tail, pt1) -> {
           if (setMatch(i, matchesHead = false, matchesPt1 = true)) {
             break
           }
         }
+
         geo.isEqualVec2(tail, pt2) -> {
           if (setMatch(i, matchesHead = false, matchesPt1 = false)) {
             break
@@ -325,12 +322,10 @@ internal fun SegmentChainer(
         val newSeg = joinSegments(seg, next, geo)
         if (newSeg != null) {
           chain.segs.removeFirst()
-//          chain[0] = newSeg;
           chain.segs[0] = newSeg
           log?.chainSimplifyHead(index, BuildLog.ISegFill(newSeg, chain.fill), closed)
         }
       } else {
-//        const next = chain[chain.length - 2];
         val next = chain[chain.size - 2]
         val newSeg = joinSegments(next, seg, geo)
         if (newSeg != null) {
@@ -379,7 +374,7 @@ internal fun SegmentChainer(
         }
       }
     } else {
-//      // otherwise, we matched two chains, so we need to combine those chains together
+      // otherwise, we matched two chains, so we need to combine those chains together
 //      const appendChain = (index1: number, index2: number) => {
 //        // index1 gets index2 appended to it, and index2 is removed
 //        const { segs: chain1, fill } = chains[index1];
@@ -487,7 +482,7 @@ internal fun SegmentChainer(
 //          }
 //        }
 //      }
-      TODO()
+      TODO("SegmentChainer - curves not yet implemented")
     }
   }
   for (oc in openChains) {

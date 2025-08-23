@@ -40,7 +40,7 @@ class ListBoolTransition<T : Any>(
 )
 
 //export class SegmentBoolBase<T> {
-abstract class SegmentBoolBase<T>  {
+abstract class SegmentBoolBase<T> {
 //  id: number;
 //  data: T;
 //  myFill: SegmentBoolFill;
@@ -126,8 +126,20 @@ internal fun <T : SegmentBool> copySegmentBool(
   log: BuildLog?,
 ): T {
   return when (seg) {
-    is SegmentBoolCurve -> SegmentBoolCurve(seg.data, seg.myFill, seg.closed, log) as T
-    is SegmentBoolLine  -> SegmentBoolLine(seg.data, seg.myFill, seg.closed, log) as T
+    is SegmentBoolCurve -> SegmentBoolCurve(
+      data = seg.data,
+      fill = seg.myFill,
+      closed = seg.closed,
+      log = log,
+    ) as T
+
+    is SegmentBoolLine  -> SegmentBoolLine(
+      data = seg.data,
+      fill = seg.myFill,
+      closed = seg.closed,
+      log = log,
+    ) as T
+
     else                -> error("Unknown SegmentBool in copySegmentBool")
   }
 }
@@ -332,10 +344,20 @@ class Intersecter internal constructor(
 //          : null;
     val ns: SegmentBool? =
       if (right is SegmentLine) {
-        SegmentBoolLine(right, ev.seg.myFill, ev.seg.closed, this.log)
+        SegmentBoolLine(
+          data = right,
+          fill = ev.seg.myFill,
+          closed = ev.seg.closed,
+          log = this.log,
+        )
       } else {
         if (right is SegmentCurve) {
-          SegmentBoolCurve(right, ev.seg.myFill, ev.seg.closed, this.log)
+          SegmentBoolCurve(
+            data = right,
+            fill = ev.seg.myFill,
+            closed = ev.seg.closed,
+            log = this.log,
+          )
         } else {
           null
         }

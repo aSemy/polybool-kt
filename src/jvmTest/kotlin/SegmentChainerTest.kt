@@ -10,6 +10,7 @@ import kotlinx.serialization.json.jsonArray
 import org.graalvm.polyglot.Context
 import org.graalvm.polyglot.Source
 import org.graalvm.polyglot.Value
+import org.graalvm.polyglot.proxy.ProxyObject
 
 class SegmentChainerTest {
 
@@ -21,18 +22,25 @@ class SegmentChainerTest {
         SegmentLine(
           p0 = Vec2(1.0, 2.0),
           p1 = Vec2(3.0, 4.0),
-          geo,
+          geo = geo,
         )
       )
     )
 
+    val buildLog = BuildLog()
+
     val ktResult = runCatching {
       SegmentChainer(
-        segments,
-        geo,
-        null,
+        segments = segments,
+        geo = geo,
+        log = buildLog,
       )
     }.getOrNull()
+
+    println("BuildLog.list():")
+    buildLog.list().forEach {
+      println(it)
+    }
 
     val ktResultStr = ktResult?.toJsonString()
 
@@ -47,28 +55,28 @@ class SegmentChainerTest {
     val geo = GeometryEpsilon()
     val segments = listOf(
       SegmentBoolLine(
-        SegmentLine(p0 = Vec2(50.0, 50.0), p1 = Vec2(110.0, 50.0), geo = geo),
-        SegmentBoolFill(above = true, below = false),
+        data = SegmentLine(p0 = Vec2(50.0, 50.0), p1 = Vec2(110.0, 50.0), geo = geo),
+        fill = SegmentBoolFill(above = true, below = false),
         closed = true,
-        null,
+        log = null,
         myFill = SegmentBoolFill(above = true, below = false),
-        null
+        otherFill = null,
       ),
       SegmentBoolLine(
-        SegmentLine(p0 = Vec2(110.0, 50.0), p1 = Vec2(110.0, 110.0), geo = geo),
-        SegmentBoolFill(above = true, below = false),
+        data = SegmentLine(p0 = Vec2(110.0, 50.0), p1 = Vec2(110.0, 110.0), geo = geo),
+        fill = SegmentBoolFill(above = true, below = false),
         closed = true,
-        null,
+        log = null,
         myFill = SegmentBoolFill(above = true, below = false),
-        null
+        otherFill = null,
       ),
       SegmentBoolLine(
-        SegmentLine(p0 = Vec2(50.0, 50.0), p1 = Vec2(110.0, 110.0), geo = geo),
-        SegmentBoolFill(above = false, below = true),
+        data = SegmentLine(p0 = Vec2(50.0, 50.0), p1 = Vec2(110.0, 110.0), geo = geo),
+        fill = SegmentBoolFill(above = false, below = true),
         closed = true,
-        null,
+        log = null,
         myFill = SegmentBoolFill(above = false, below = true),
-        null
+        otherFill = null,
       ),
       SegmentBoolLine(
         SegmentLine(p0 = Vec2(130.0, 50.0), p1 = Vec2(130.0, 130.0), geo = geo),
@@ -79,86 +87,95 @@ class SegmentChainerTest {
         null
       ),
       SegmentBoolLine(
-        SegmentLine(p0 = Vec2(130.0, 130.0), p1 = Vec2(150.0, 150.0), geo = geo),
-        SegmentBoolFill(above = false, below = true),
+        data = SegmentLine(p0 = Vec2(130.0, 130.0), p1 = Vec2(150.0, 150.0), geo = geo),
+        fill = SegmentBoolFill(above = false, below = true),
         closed = true,
-        null,
+        log = null,
         myFill = SegmentBoolFill(above = false, below = true),
-        null
+        otherFill = null,
       ),
       SegmentBoolLine(
-        SegmentLine(p0 = Vec2(130.0, 50.0), p1 = Vec2(178.0, 80.0), geo = geo),
-        SegmentBoolFill(above = true, below = false),
+        data = SegmentLine(p0 = Vec2(130.0, 50.0), p1 = Vec2(178.0, 80.0), geo = geo),
+        fill = SegmentBoolFill(above = true, below = false),
         closed = true,
-        null,
+        log = null,
         myFill = SegmentBoolFill(above = true, below = false),
-        null
+        otherFill = null,
       ),
       SegmentBoolLine(
-        SegmentLine(p0 = Vec2(150.0, 150.0), p1 = Vec2(178.0, 80.0), geo = geo),
-        SegmentBoolFill(above = false, below = true),
+        data = SegmentLine(p0 = Vec2(150.0, 150.0), p1 = Vec2(178.0, 80.0), geo = geo),
+        fill = SegmentBoolFill(above = false, below = true),
         closed = true,
-        null,
+        log = null,
         myFill = SegmentBoolFill(above = false, below = true),
-        null
+        otherFill = null,
       ),
       SegmentBoolLine(
-        SegmentLine(p0 = Vec2(130.0, 50.0), p1 = Vec2(190.0, 50.0), geo = geo),
-        SegmentBoolFill(above = true, below = false),
+        data = SegmentLine(p0 = Vec2(130.0, 50.0), p1 = Vec2(190.0, 50.0), geo = geo),
+        fill = SegmentBoolFill(above = true, below = false),
         closed = true,
-        null,
+        log = null,
         myFill = SegmentBoolFill(above = true, below = false),
-        null
+        otherFill = null,
       ),
       SegmentBoolLine(
-        SegmentLine(p0 = Vec2(130.0, 50.0), p1 = Vec2(190.0, 50.0), geo = geo),
-        SegmentBoolFill(above = false, below = true),
+        data = SegmentLine(p0 = Vec2(130.0, 50.0), p1 = Vec2(190.0, 50.0), geo = geo),
+        fill = SegmentBoolFill(above = false, below = true),
         closed = true,
-        null,
+        log = null,
         myFill = SegmentBoolFill(above = false, below = true),
-        null
+        otherFill = null,
       ),
       SegmentBoolLine(
-        SegmentLine(p0 = Vec2(178.0, 80.0), p1 = Vec2(190.0, 50.0), geo = geo),
-        SegmentBoolFill(above = true, below = false),
+        data = SegmentLine(p0 = Vec2(178.0, 80.0), p1 = Vec2(190.0, 50.0), geo = geo),
+        fill = SegmentBoolFill(above = true, below = false),
         closed = true,
-        null,
+        log = null,
         myFill = SegmentBoolFill(above = true, below = false),
-        null
+        otherFill = null,
       ),
       SegmentBoolLine(
-        SegmentLine(p0 = Vec2(190.0, 50.0), p1 = Vec2(260.0, 50.0), geo = geo),
-        SegmentBoolFill(above = true, below = false),
+        data = SegmentLine(p0 = Vec2(190.0, 50.0), p1 = Vec2(260.0, 50.0), geo = geo),
+        fill = SegmentBoolFill(above = true, below = false),
         closed = true,
-        null,
+        log = null,
         myFill = SegmentBoolFill(above = true, below = false),
-        null
+        otherFill = null,
       ),
       SegmentBoolLine(
-        SegmentLine(p0 = Vec2(260.0, 50.0), p1 = Vec2(260.0, 131.25), geo = geo),
-        SegmentBoolFill(above = true, below = false),
+        data = SegmentLine(p0 = Vec2(260.0, 50.0), p1 = Vec2(260.0, 131.25), geo = geo),
+        fill = SegmentBoolFill(above = true, below = false),
         closed = true,
-        null,
+        log = null,
         myFill = SegmentBoolFill(above = true, below = false),
-        null
+        otherFill = null,
       ),
       SegmentBoolLine(
-        SegmentLine(p0 = Vec2(178.0, 80.0), p1 = Vec2(260.0, 131.25), geo = geo),
-        SegmentBoolFill(above = false, below = true),
+        data = SegmentLine(p0 = Vec2(178.0, 80.0), p1 = Vec2(260.0, 131.25), geo = geo),
+        fill = SegmentBoolFill(above = false, below = true),
         closed = true,
-        null,
+        log = null,
         myFill = SegmentBoolFill(above = false, below = true),
-        null
+        otherFill = null,
       ),
     )
 
+    val buildLog = BuildLog()
+
     val ktResult = kotlin.runCatching {
       SegmentChainer(
-        segments,
-        geo,
-        null,
+        segments = segments,
+        geo = geo,
+        log = buildLog,
       )
     }.getOrNull()
+
+
+    println("BuildLog.list():")
+    buildLog.list().forEach {
+      println(it)
+    }
+
 
     val ktResultStr = ktResult?.toJsonString()
     val jsResult = segmentChainerJs(segments, geo)
@@ -197,11 +214,21 @@ class SegmentChainerTest {
             segment.toJs(exports)
           }.toTypedArray()
 
+          val buildLog = exports.getMember("BuildLog").newInstance()
+
           val segmentChainer = exports.getMember("SegmentChainer")
-          val output = segmentChainer.execute(segmentsJs, geoJs, null)
+          val output = segmentChainer.execute(segmentsJs, geoJs, buildLog)
 
           val result = context.convertValueToJson(output)
           println("JS result: $result")
+
+          val buildLogList = buildLog.getMember("list")
+//          println("buildLogList: $buildLogList")
+          println("buildLogList:")
+          for (i in 0 until buildLogList.arraySize) {
+            println(buildLogList.getArrayElement(i))
+          }
+
           return result
           // Process the result
 //        val resultInKotlin = mapResultToKotlin(output)
@@ -250,9 +277,23 @@ private fun SegmentBool.toJs(exports: Value): Value {
       val segmentBoolLineClass = exports.getMember("SegmentBoolLine")
       return segmentBoolLineClass.newInstance(
         data.toJsValue(exports),
+        fill?.toJs( ),
+        closed,
+        log,
+        myFill.toJs( ),
+        otherFill?.toJs( ),
       )
     }
   }
+}
+
+private fun SegmentBoolFill.toJs(): ProxyObject {
+  return ProxyObject.fromMap(
+    mapOf(
+      "above" to above,
+      "below" to below,
+    )
+  )
 }
 
 

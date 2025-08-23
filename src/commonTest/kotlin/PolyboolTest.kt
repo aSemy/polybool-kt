@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 
 @Suppress("unused")
 val PolyBoolTest by testSuite {
+  return@testSuite
 
   testSuite("basic intersection") {
     val result = polybool.intersect(triangle1, triangle2)

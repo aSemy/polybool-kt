@@ -62,12 +62,26 @@ internal fun select(
       when (seg) {
         is SegmentBoolLine  -> {
 //        result.push(new SegmentBoolLine(seg.data, fill, seg.closed, log));
-          result.addLast(SegmentBoolLine(seg.data, fill, seg.closed, log))
+          result.addLast(
+            SegmentBoolLine(
+              data = seg.data,
+              fill = fill,
+              closed = seg.closed,
+              log = log,
+            )
+          )
         }
 
         is SegmentBoolCurve -> {
 //        result.push(new SegmentBoolCurve(seg.data, fill, seg.closed, log));
-          result.addLast(SegmentBoolCurve(seg.data, fill, seg.closed, log))
+          result.addLast(
+            SegmentBoolCurve(
+              data = seg.data,
+              fill = fill,
+              closed = seg.closed,
+              log = log,
+            )
+          )
         }
       }
     }
